@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authApi } from '../api/auth';
 import { useAuthStore } from '../store/authStore';
@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { Brain, User, Mail, Lock, ArrowRight, ArrowLeft } from 'lucide-react';
 
 export default function RegisterPage() {
+  useEffect(() => { document.title = 'Register - FitMind'; }, []);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();

@@ -1,25 +1,29 @@
 import { ApiResponse, WorkoutSession, PersonalRecord, ProgressionPoint } from '../types';
-import { mockDailyDashboard, mockPRs } from './mockData';
-
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+import { api } from './axios';
 
 export const workoutApi = {
   createSession: async (data: any) => {
-    await delay(1000);
-    return { success: true, data: { ...data, id: Math.random(), exercises: [], totalVolume: 0 } } as ApiResponse<WorkoutSession>;
+    const res = await api.post<ApiResponse<WorkoutSession>>('/workouts/sessions', data);
+    return res.data;
   },
   addExercise: async (sessionId: number, data: any) => {
-    return { success: true, data: null as any } as any;
+    const res = await api.post<ApiResponse<WorkoutSession>>(`/workouts/sessions/${sessionId}/exercises`, data);
+    return res.data;
   },
   getSessions: async (from: string, to: string) => {
-    await delay(800);
-    return { success: true, data: mockDailyDashboard.workouts } as ApiResponse<WorkoutSession[]>;
+    const res = await api.get<ApiResponse<WorkoutSession[]>>('/workouts/sessions', { params: { from, to } });
+    return res.data;
   },
   getPRs: async () => {
-    await delay(600);
-    return { success: true, data: mockPRs } as ApiResponse<PersonalRecord[]>;
+    const res = await api.get<ApiResponse<PersonalRecord[]>>('/workouts/exercises/prs');
+    return res.data;
   },
   getProgression: async (exerciseName: string) => {
-    return { success: true, data: [] } as ApiResponse<ProgressionPoint[]>;
+    const res = await api.get<ApiResponse<ProgressionPoint[]>>(`/workouts/exercises/${encodeURIComponent(exerciseName)}/progression`);
+    return res.data;
+  },
+  deleteSession: async (id: number) => {
+    const res = await api.delete<ApiResponse<void>>(`/workouts/sessions/${id}`);
+    return res.data;
   }
 };

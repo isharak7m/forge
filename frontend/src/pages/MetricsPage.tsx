@@ -17,6 +17,8 @@ export default function MetricsPage() {
     waterLiters: ''
   });
 
+  useEffect(() => { document.title = 'Metrics - FitMind'; }, []);
+
   useEffect(() => {
     loadData();
   }, []);

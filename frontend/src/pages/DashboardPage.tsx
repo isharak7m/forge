@@ -1,15 +1,29 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { analyticsApi } from '../api/analytics';
 import { DailyDashboard } from '../types';
+import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 import { Activity, Flame, Utensils, Moon, Dumbbell, Droplets } from 'lucide-react';
 import { RadialBarChart, RadialBar, ResponsiveContainer, PolarAngleAxis } from 'recharts';
 
+function calculateTDEE(user: { age?: number; gender?: string; heightCm?: number; currentWeightKg?: number; activityLevel?: string }): number {
+  if (!user.age || !user.heightCm || !user.currentWeightKg) return 2500;
+  const bmr = user.gender === 'female'
+    ? 10 * user.currentWeightKg + 6.25 * user.heightCm - 5 * user.age - 161
+    : 10 * user.currentWeightKg + 6.25 * user.heightCm - 5 * user.age + 5;
+  const factors: Record<string, number> = { sedentary: 1.2, light: 1.375, moderate: 1.55, active: 1.725, extra_active: 1.9 };
+  return Math.round(bmr * (factors[user.activityLevel || ''] || 1.55));
+}
+
 export default function DashboardPage() {
+  const { user } = useAuthStore();
   const [data, setData] = useState<DailyDashboard | null>(null);
   const [loading, setLoading] = useState(true);
   const today = format(new Date(), 'yyyy-MM-dd');
+  const targetCalories = useMemo(() => calculateTDEE(user || {}), [user]);
+
+  useEffect(() => { document.title = 'Dashboard - FitMind'; }, []);
 
   useEffect(() => {
     loadData();
@@ -43,15 +57,10 @@ export default function DashboardPage() {
 
   if (!data) return null;
 
-  const targetCalories = 2500; // Mock target
-  const calorieData = [
-    { name: 'Calories', value: data.caloriesConsumed, fill: '#3b82f6' }
-  ];
-
   return (
     <div className="flex flex-col gap-6">
       {/* Header Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         <div className="card-glass flex items-center p-6 gap-4">
           <div className="p-3 bg-[rgba(59,130,246,0.1)] rounded-lg">
             <Flame className="text-blue-400" size={24} />
@@ -62,6 +71,16 @@ export default function DashboardPage() {
           </div>
         </div>
         
+        <div className="card-glass flex items-center p-6 gap-4">
+          <div className="p-3 bg-[rgba(239,68,68,0.1)] rounded-lg">
+            <Flame className="text-red-400" size={24} />
+          </div>
+          <div>
+            <p className="text-sm text-secondary">Calories Burned</p>
+            <h3 className="text-2xl font-bold">{data.caloriesBurned.toFixed(0)} <span className="text-sm text-secondary font-normal">kcal</span></h3>
+          </div>
+        </div>
+
         <div className="card-glass flex items-center p-6 gap-4">
           <div className="p-3 bg-[rgba(16,185,129,0.1)] rounded-lg">
             <Dumbbell className="text-green-400" size={24} />
@@ -94,25 +113,33 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Calorie Gauge */}
+        {/* Calorie Gauges */}
         <div className="card-glass col-span-1 flex flex-col items-center justify-center min-h-[300px]">
           <h3 className="font-semibold w-full text-left mb-4">Daily Calorie Goal</h3>
-          <div className="relative w-48 h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <RadialBarChart 
-                cx="50%" cy="50%" 
-                innerRadius="70%" outerRadius="100%" 
-                barSize={15} 
-                data={calorieData} 
-                startAngle={210} endAngle={-30}
-              >
-                <PolarAngleAxis type="number" domain={[0, targetCalories]} angleAxisId={0} tick={false} />
-                <RadialBar background={{ fill: 'rgba(255,255,255,0.05)' }} dataKey="value" cornerRadius={10} />
-              </RadialBarChart>
-            </ResponsiveContainer>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-3xl font-bold text-blue-400">{data.caloriesConsumed.toFixed(0)}</span>
-              <span className="text-xs text-secondary">of {targetCalories}</span>
+          <div className="flex gap-6 justify-center w-full">
+            <div className="relative w-40 h-40">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadialBarChart cx="50%" cy="50%" innerRadius="70%" outerRadius="100%" barSize={12} data={[{ name: 'Consumed', value: Math.min(data.caloriesConsumed, targetCalories), fill: '#3b82f6' }]} startAngle={210} endAngle={-30}>
+                  <PolarAngleAxis type="number" domain={[0, targetCalories]} angleAxisId={0} tick={false} />
+                  <RadialBar background={{ fill: 'rgba(255,255,255,0.05)' }} dataKey="value" cornerRadius={10} />
+                </RadialBarChart>
+              </ResponsiveContainer>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-xl font-bold text-blue-400">{data.caloriesConsumed.toFixed(0)}</span>
+                <span className="text-xs text-secondary">consumed</span>
+              </div>
+            </div>
+            <div className="relative w-40 h-40">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadialBarChart cx="50%" cy="50%" innerRadius="70%" outerRadius="100%" barSize={12} data={[{ name: 'Burned', value: Math.min(data.caloriesBurned, targetCalories), fill: '#ef4444' }]} startAngle={210} endAngle={-30}>
+                  <PolarAngleAxis type="number" domain={[0, targetCalories]} angleAxisId={0} tick={false} />
+                  <RadialBar background={{ fill: 'rgba(255,255,255,0.05)' }} dataKey="value" cornerRadius={10} />
+                </RadialBarChart>
+              </ResponsiveContainer>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-xl font-bold text-red-400">{data.caloriesBurned.toFixed(0)}</span>
+                <span className="text-xs text-secondary">burned</span>
+              </div>
             </div>
           </div>
           <div className="w-full flex justify-between mt-4 text-sm text-secondary px-4">

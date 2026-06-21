@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authApi } from '../api/auth';
 import { useAuthStore } from '../store/authStore';
@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { Brain, Mail, Lock, ArrowRight, Activity, TrendingUp } from 'lucide-react';
 
 export default function LoginPage() {
+  useEffect(() => { document.title = 'Login - FitMind'; }, []);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);

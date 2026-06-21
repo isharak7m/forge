@@ -7,6 +7,16 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   const { user, logout } = useAuthStore();
 
+  const pageTitleMap: Record<string, string> = {
+    '/dashboard': 'Dashboard',
+    '/nutrition': 'Nutrition Tracker',
+    '/workouts': 'Workout Log',
+    '/metrics': 'Body Metrics',
+    '/ai': 'AI Fitness Hub',
+    '/profile': 'Profile Settings',
+  };
+  const pageTitle = pageTitleMap[location.pathname] || 'FitMind';
+
   const links = [
     { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/nutrition', icon: PieChart, label: 'Nutrition' },
@@ -72,13 +82,33 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       <div className="flex-1 md:ml-64 flex flex-col min-h-screen">
         <header className="h-16 border-b border-[rgba(48,54,61,0.8)] bg-[rgba(22,27,34,0.8)] backdrop-blur-md sticky top-0 z-10 flex items-center px-6">
            <h2 className="text-lg font-semibold text-primary capitalize">
-             {location.pathname.substring(1)}
+             {pageTitle}
            </h2>
         </header>
         <main className="flex-1 p-6 max-w-7xl w-full mx-auto animate-fade-in">
           {children}
         </main>
       </div>
+
+      {/* Mobile Bottom Nav */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-secondary border-t border-[rgba(48,54,61,0.8)] flex justify-around items-center py-2 z-20">
+        {links.map((link) => {
+          const Icon = link.icon;
+          const isActive = location.pathname === link.to;
+          return (
+            <Link
+              key={link.to}
+              to={link.to}
+              className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg transition-all ${
+                isActive ? 'text-blue-400' : 'text-secondary hover:text-primary'
+              }`}
+            >
+              <Icon size={20} />
+              <span className="text-xs font-medium">{link.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
     </div>
   );
 };

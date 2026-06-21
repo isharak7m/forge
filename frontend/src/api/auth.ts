@@ -1,36 +1,13 @@
 import { AuthResponse, ApiResponse } from '../types';
-import { mockUser } from './mockData';
-
-// Simulated delay
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+import { api } from './axios';
 
 export const authApi = {
   login: async (data: any) => {
-    await delay(1000);
-    const res: ApiResponse<AuthResponse> = {
-      success: true,
-      message: 'Logged in successfully',
-      timestamp: new Date().toISOString(),
-      data: {
-        token: 'mock-jwt-token-for-demo',
-        tokenType: 'Bearer',
-        user: mockUser
-      }
-    };
-    return res;
+    const res = await api.post<ApiResponse<AuthResponse>>('/auth/login', data);
+    return res.data;
   },
   register: async (data: any) => {
-    await delay(1500);
-    const res: ApiResponse<AuthResponse> = {
-      success: true,
-      message: 'Registered successfully',
-      timestamp: new Date().toISOString(),
-      data: {
-        token: 'mock-jwt-token-for-demo',
-        tokenType: 'Bearer',
-        user: { ...mockUser, name: data.name, email: data.email }
-      }
-    };
-    return res;
+    const res = await api.post<ApiResponse<AuthResponse>>('/auth/register', data);
+    return res.data;
   }
 };

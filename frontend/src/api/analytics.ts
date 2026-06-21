@@ -1,26 +1,21 @@
-import { ApiResponse, DailyDashboard } from '../types';
-import { mockDailyDashboard } from './mockData';
-
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+import { ApiResponse, DailyDashboard, WeeklyDashboard, MonthlyDashboard, AllTimeDashboard } from '../types';
+import { api } from './axios';
 
 export const analyticsApi = {
   getDailyDashboard: async (date: string) => {
-    await delay(800);
-    const res: ApiResponse<DailyDashboard> = {
-      success: true,
-      message: 'Success',
-      timestamp: new Date().toISOString(),
-      data: mockDailyDashboard
-    };
-    return res;
+    const res = await api.get<ApiResponse<DailyDashboard>>('/analytics/dashboard/daily', { params: { date } });
+    return res.data;
   },
   getWeeklyDashboard: async (week: number, year: number) => {
-    return { success: true, data: null as any } as any;
+    const res = await api.get<ApiResponse<WeeklyDashboard>>('/analytics/dashboard/weekly', { params: { week, year } });
+    return res.data;
   },
   getMonthlyDashboard: async (month: number, year: number) => {
-    return { success: true, data: null as any } as any;
+    const res = await api.get<ApiResponse<MonthlyDashboard>>('/analytics/dashboard/monthly', { params: { month, year } });
+    return res.data;
   },
   getAllTimeDashboard: async () => {
-    return { success: true, data: null as any } as any;
+    const res = await api.get<ApiResponse<AllTimeDashboard>>('/analytics/dashboard/alltime');
+    return res.data;
   }
 };

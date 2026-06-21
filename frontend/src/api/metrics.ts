@@ -1,15 +1,15 @@
 import { ApiResponse, BodyMetric, TrendPoint } from '../types';
-import { mockWeightTrend } from './mockData';
-
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+import { api } from './axios';
 
 export const metricApi = {
   recordMetric: async (data: any) => {
-    await delay(1000);
-    return { success: true, data: { ...data, id: Math.random() } } as ApiResponse<BodyMetric>;
+    const res = await api.post<ApiResponse<BodyMetric>>('/metrics', data);
+    return res.data;
   },
   getWeightTrend: async () => {
-    await delay(800);
-    return { success: true, data: mockWeightTrend } as ApiResponse<TrendPoint[]>;
+    const to = new Date().toISOString().split('T')[0];
+    const from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const res = await api.get<ApiResponse<TrendPoint[]>>('/metrics/trends/weight', { params: { from, to } });
+    return res.data;
   }
 };
