@@ -20,7 +20,10 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       isAuthenticated: false,
       tokenExpiresAt: null,
-      login: (token, user) => set({ token, user, isAuthenticated: true, tokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000 }),
+      login: (token, user) => {
+        console.log('Storing user:', user);
+        set({ token, user, isAuthenticated: true, tokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000 });
+      },
       logout: () => set({ token: null, user: null, isAuthenticated: false, tokenExpiresAt: null }),
       setUser: (user) => set({ user }),
       isTokenExpired: () => {
