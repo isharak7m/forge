@@ -1,0 +1,64 @@
+spring:
+  application:
+    name: FitMind
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/fitmind
+    username: fitmind_user
+    password: fitmind_pass
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+
+server:
+  port: 8080
+
+# JWT Configuration
+jwt:
+  secret: fitmind-super-secret-key-for-jwt-token-signing-must-be-at-least-256-bits-long
+  expiration: 86400000  # 24 hours in milliseconds
+
+# SpringDoc OpenAPI
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+  info:
+    title: FitMind API
+    description: AI-Powered Personal Fitness Analytics Platform API
+    version: 1.0.0
+
+# Logging
+logging:
+  level:
+    com.fitmind: DEBUG
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+
+# CORS
+cors:
+  allowed-origins: "http://localhost:5173,http://localhost:3000"
+  allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
+  allowed-headers: "*"
+  max-age: 3600
+
+# Management
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
