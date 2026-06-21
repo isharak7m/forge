@@ -29,7 +29,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="flex min-h-screen bg-primary">
       {/* Sidebar */}
-      <div className="w-64 bg-secondary border-r border-[rgba(48,54,61,0.8)] flex flex-col hidden md:flex fixed h-full z-10">
+      <div className="w-64 bg-[#161b22] border-r border-[rgba(48,54,61,0.8)] flex-col hidden md:flex fixed h-full z-10">
         <div className="p-6 flex items-center gap-3">
           <div className="p-2 bg-gradient-blue rounded-lg">
             <Brain size={24} className="text-white" />
@@ -85,7 +85,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
              {pageTitle}
            </h2>
         </header>
-        <main className="flex-1 p-6 max-w-7xl w-full mx-auto animate-fade-in">
+        <main className="flex-1 p-6 pb-24 md:pb-6 max-w-7xl w-full mx-auto animate-fade-in">
           {children}
         </main>
       </div>

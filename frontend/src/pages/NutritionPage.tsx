@@ -202,12 +202,12 @@ export default function NutritionPage() {
         <div className="card-glass animate-fade-in">
           <h3 className="font-semibold mb-4">Log Food</h3>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="form-group mb-0 relative" onBlur={() => setTimeout(() => setSearchResults([]), 200)}>
+            <div style={{ position: 'relative' }} className="form-group mb-0" onBlur={() => setTimeout(() => setSearchResults([]), 200)}>
               <label className="label">Search Food (Open Food Facts)</label>
               <input type="text" className="input" placeholder="e.g., chicken breast..." value={searchQuery} onChange={e => handleSearch(e.target.value)} />
               {searching && <p className="text-xs text-secondary mt-1">Searching...</p>}
               {searchResults.length > 0 && (
-                <div className="absolute z-20 top-full left-0 right-0 bg-[#1c2128] border border-[rgba(48,54,61,0.8)] rounded-lg mt-1 max-h-48 overflow-y-auto shadow-xl">
+                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50 }} className="bg-[#1c2128] border border-[rgba(48,54,61,0.8)] rounded-lg mt-1 max-h-48 overflow-y-auto shadow-xl">
                   {searchResults.map((p, i) => {
                     const n = p.nutriments || {};
                     const kcal = n['energy-kcal_100g'] ?? Math.round((n['energy_100g'] || 0) / 4.184);
