@@ -1,20 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthStore } from '../store/authStore';
-import { authApi } from '../api/auth';
+import { userApi } from '../api/user';
 import { User } from '../types';
 import toast from 'react-hot-toast';
 import { User as UserIcon, Save } from 'lucide-react';
-import { api } from '../api/axios';
 
 export default function ProfilePage() {
   const { user, setUser } = useAuthStore();
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => { document.title = 'Profile - FitMind'; }, []);
+
   const [formData, setFormData] = useState<Partial<User>>({
     name: user?.name || '',
     age: user?.age || 0,
     heightCm: user?.heightCm || 0,
+    currentWeightKg: user?.currentWeightKg || 0,
     goalWeightKg: user?.goalWeightKg || 0,
-    activityLevel: user?.activityLevel || 'MODERATELY_ACTIVE',
+    gender: user?.gender || 'male',
+    activityLevel: user?.activityLevel || 'moderate',
     fitnessGoal: user?.fitnessGoal || 'FAT_LOSS'
   });
 
@@ -26,16 +30,16 @@ export default function ProfilePage() {
     e.preventDefault();
     setLoading(true);
     try {
-      // In a real app we'd have a specific profile update endpoint in authApi or userApi
-      const res = await api.put('/users/me', {
+      const res = await userApi.updateProfile({
          ...formData,
          age: Number(formData.age),
          heightCm: Number(formData.heightCm),
+         currentWeightKg: Number(formData.currentWeightKg),
          goalWeightKg: Number(formData.goalWeightKg)
       });
-      if (res.data.success) {
+      if (res.success) {
         toast.success('Profile updated successfully');
-        setUser(res.data.data);
+        setUser(res.data);
       }
     } catch (e) {
       toast.error('Failed to update profile');
@@ -84,8 +88,21 @@ export default function ProfilePage() {
           </div>
           
           <div className="form-group mb-0">
+            <label className="label">Current Weight (kg)</label>
+            <input type="number" name="currentWeightKg" className="input" value={formData.currentWeightKg} onChange={handleChange} required />
+          </div>
+
+          <div className="form-group mb-0">
             <label className="label">Goal Weight (kg)</label>
             <input type="number" name="goalWeightKg" className="input" value={formData.goalWeightKg} onChange={handleChange} required />
+          </div>
+
+          <div className="form-group mb-0">
+            <label className="label">Gender</label>
+            <select name="gender" className="input" value={formData.gender} onChange={handleChange}>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
           </div>
 
           <div className="form-group mb-0">

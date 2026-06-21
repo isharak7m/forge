@@ -29,7 +29,7 @@ public class WorkoutController {
 
     private final WorkoutService workoutService;
 
-    @PostMapping("/session")
+    @PostMapping("/sessions")
     @Operation(summary = "Create workout session")
     public ResponseEntity<ApiResponse<WorkoutSessionResponse>> createSession(
             @AuthenticationPrincipal User user,
@@ -37,7 +37,7 @@ public class WorkoutController {
         return ResponseEntity.ok(ApiResponse.success(workoutService.createSession(user.getId(), request)));
     }
 
-    @PostMapping("/session/{id}/exercise")
+    @PostMapping("/sessions/{id}/exercises")
     @Operation(summary = "Add exercise to session")
     public ResponseEntity<ApiResponse<WorkoutSessionResponse>> addExercise(
             @AuthenticationPrincipal User user,
@@ -55,7 +55,7 @@ public class WorkoutController {
         return ResponseEntity.ok(ApiResponse.success(workoutService.getSessions(user.getId(), from, to)));
     }
 
-    @GetMapping("/analytics/volume")
+    @GetMapping("/volume")
     @Operation(summary = "Get volume analytics")
     public ResponseEntity<ApiResponse<Map<String, Double>>> getVolumeAnalytics(
             @AuthenticationPrincipal User user,
@@ -64,13 +64,13 @@ public class WorkoutController {
         return ResponseEntity.ok(ApiResponse.success(workoutService.getVolumeAnalytics(user.getId(), from, to)));
     }
 
-    @GetMapping("/analytics/prs")
+    @GetMapping("/exercises/prs")
     @Operation(summary = "Get personal records")
     public ResponseEntity<ApiResponse<List<PersonalRecord>>> getPRs(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(ApiResponse.success(workoutService.getPersonalRecords(user.getId())));
     }
 
-    @GetMapping("/analytics/frequency")
+    @GetMapping("/frequency")
     @Operation(summary = "Get muscle group frequency")
     public ResponseEntity<ApiResponse<Map<String, Long>>> getMuscleFrequency(
             @AuthenticationPrincipal User user,
@@ -79,7 +79,7 @@ public class WorkoutController {
         return ResponseEntity.ok(ApiResponse.success(workoutService.getMuscleGroupFrequency(user.getId(), from, to)));
     }
 
-    @GetMapping("/analytics/progression/{exerciseName}")
+    @GetMapping("/exercises/{exerciseName}/progression")
     @Operation(summary = "Get exercise progression")
     public ResponseEntity<ApiResponse<List<ProgressionPoint>>> getProgression(
             @AuthenticationPrincipal User user,

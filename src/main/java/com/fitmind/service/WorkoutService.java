@@ -121,6 +121,15 @@ public class WorkoutService {
         return frequency;
     }
 
+    public void deleteSession(Long userId, Long sessionId) {
+        WorkoutSession session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Workout session not found"));
+        if (!session.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Unauthorized");
+        }
+        sessionRepository.delete(session);
+    }
+
     public List<ProgressionPoint> getExerciseProgression(Long userId, String exerciseName) {
         List<ExerciseLog> logs = exerciseRepository.findByUserIdAndExerciseNameOrderByDate(userId, exerciseName);
         return logs.stream().map(log -> ProgressionPoint.builder()

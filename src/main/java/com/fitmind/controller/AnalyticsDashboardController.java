@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 
 @RestController
-@RequestMapping("/api/analytics")
+@RequestMapping("/api/analytics/dashboard")
 @RequiredArgsConstructor
 @Tag(name = "Analytics Dashboard")
 public class AnalyticsDashboardController {

@@ -12,6 +12,13 @@ export default function WorkoutsPage() {
 
   const [showSessionForm, setShowSessionForm] = useState(false);
   const [sessionForm, setSessionForm] = useState({ name: '', durationMinutes: '', date: format(new Date(), 'yyyy-MM-dd') });
+  const [addingExerciseForSession, setAddingExerciseForSession] = useState<number | null>(null);
+  const [exerciseSearch, setExerciseSearch] = useState('');
+  const [exerciseResults, setExerciseResults] = useState<any[]>([]);
+  const [exerciseSearching, setExerciseSearching] = useState(false);
+  const [exerciseForm, setExerciseForm] = useState({ exerciseName: '', sets: 3, reps: 10, weightKg: 0 });
+
+  useEffect(() => { document.title = 'Workouts - FitMind'; }, []);
 
   useEffect(() => {
     loadData();
@@ -35,6 +42,38 @@ export default function WorkoutsPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleExerciseSearch = async (query: string) => {
+    setExerciseSearch(query);
+    if (query.length < 2) { setExerciseResults([]); return; }
+    setExerciseSearching(true);
+    try {
+      const res = await fetch(`https://wger.de/api/v2/exercise/?language=2&limit=8&search=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      setExerciseResults(data.results || []);
+    } catch { setExerciseResults([]); }
+    finally { setExerciseSearching(false); }
+  };
+
+  const selectExercise = (name: string) => {
+    setExerciseForm(prev => ({ ...prev, exerciseName: name }));
+    setExerciseSearch('');
+    setExerciseResults([]);
+  };
+
+  const handleAddExercise = async (sessionId: number, e: React.FormEvent) => {
+    e.preventDefault();
+    if (!exerciseForm.exerciseName) return;
+    const optimistic = { id: -Date.now(), exerciseName: exerciseForm.exerciseName, category: '', sets: exerciseForm.sets, reps: exerciseForm.reps, weightKg: exerciseForm.weightKg, rpe: 0, notes: '', volume: exerciseForm.sets * exerciseForm.reps * exerciseForm.weightKg };
+    setSessions(prev => prev.map(s => s.id === sessionId ? { ...s, exercises: [...s.exercises, optimistic], totalVolume: s.totalVolume + optimistic.volume } : s));
+    try {
+      const res = await workoutApi.addExercise(sessionId, exerciseForm);
+      if (res.success) toast.success('Exercise added!');
+      loadData();
+    } catch { toast.error('Failed to add exercise'); loadData(); }
+    setAddingExerciseForSession(null);
+    setExerciseForm({ exerciseName: '', sets: 3, reps: 10, weightKg: 0 });
   };
 
   const handleCreateSession = async (e: React.FormEvent) => {
@@ -130,6 +169,47 @@ export default function WorkoutsPage() {
                     </table>
                   ) : (
                     <p className="text-sm text-secondary italic">No exercises logged in this session yet.</p>
+                  )}
+                  <button className="btn btn-ghost text-sm mt-3" onClick={() => setAddingExerciseForSession(addingExerciseForSession === session.id ? null : session.id)}>
+                    <Plus size={16} /> Add Exercise
+                  </button>
+                  {addingExerciseForSession === session.id && (
+                    <form onSubmit={(e) => handleAddExercise(session.id, e)} className="mt-3 p-3 bg-[rgba(0,0,0,0.2)] rounded-lg grid grid-cols-1 md:grid-cols-5 gap-3">
+                      <div className="form-group mb-0 relative md:col-span-2">
+                        <label className="label text-xs">Search Exercise (wger)</label>
+                        <input type="text" className="input text-sm" placeholder="e.g., bench press..." value={exerciseSearch} onChange={e => handleExerciseSearch(e.target.value)} />
+                        {exerciseSearching && <p className="text-xs text-secondary mt-1">Searching...</p>}
+                        {exerciseResults.length > 0 && (
+                          <div className="absolute z-20 top-full left-0 right-0 bg-[#1c2128] border border-[rgba(48,54,61,0.8)] rounded-lg mt-1 max-h-40 overflow-y-auto shadow-xl">
+                            {exerciseResults.map((ex, i) => (
+                              <button key={i} type="button" className="w-full text-left px-3 py-2 text-sm hover:bg-[rgba(59,130,246,0.1)] transition-colors border-b border-[rgba(48,54,61,0.5)] last:border-b-0" onClick={() => selectExercise(ex.name)}>
+                                {ex.name}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <div className="form-group mb-0">
+                        <label className="label text-xs">Exercise Name</label>
+                        <input type="text" className="input text-sm" required value={exerciseForm.exerciseName} onChange={e => setExerciseForm({...exerciseForm, exerciseName: e.target.value})} />
+                      </div>
+                      <div className="form-group mb-0">
+                        <label className="label text-xs">Sets</label>
+                        <input type="number" className="input text-sm" min={1} required value={exerciseForm.sets} onChange={e => setExerciseForm({...exerciseForm, sets: parseInt(e.target.value) || 0})} />
+                      </div>
+                      <div className="form-group mb-0">
+                        <label className="label text-xs">Reps</label>
+                        <input type="number" className="input text-sm" min={1} required value={exerciseForm.reps} onChange={e => setExerciseForm({...exerciseForm, reps: parseInt(e.target.value) || 0})} />
+                      </div>
+                      <div className="form-group mb-0">
+                        <label className="label text-xs">Weight (kg)</label>
+                        <input type="number" className="input text-sm" min={0} step={0.5} required value={exerciseForm.weightKg} onChange={e => setExerciseForm({...exerciseForm, weightKg: parseFloat(e.target.value) || 0})} />
+                      </div>
+                      <div className="md:col-span-5 flex justify-end gap-2">
+                        <button type="button" className="btn btn-ghost text-sm" onClick={() => setAddingExerciseForSession(null)}>Cancel</button>
+                        <button type="submit" className="btn btn-primary text-sm">Add</button>
+                      </div>
+                    </form>
                   )}
                 </div>
               </div>

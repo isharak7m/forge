@@ -15,6 +15,8 @@ export default function AIHubPage() {
   const [isTyping, setIsTyping] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => { document.title = 'AI Hub - FitMind'; }, []);
+
   useEffect(() => {
     loadAIData();
   }, []);
@@ -53,14 +55,54 @@ export default function AIHubPage() {
     setQuery('');
     setIsTyping(true);
 
+    const apiKey = import.meta.env.VITE_GROK_API_KEY as string;
+    if (!apiKey) {
+      setChatLog(prev => [...prev, { role: 'ai', content: 'AI assistant is not configured (VITE_GROK_API_KEY missing). Please set it in your .env file.' }]);
+      setIsTyping(false);
+      return;
+    }
+
     try {
-      const res = await aiApi.askAssistant(userMsg);
-      if (res.success) {
-        setChatLog(prev => [...prev, { 
-          role: 'ai', 
-          content: res.data.response,
-          sources: res.data.dataSources 
-        }]);
+      const systemMsg = 'You are FitMind AI, a knowledgeable fitness assistant. Answer questions about fitness, nutrition, workouts, and health. Be concise and practical.';
+      const messages = [
+        { role: 'system', content: systemMsg },
+        ...chatLog.filter(m => m.role === 'user' || m.role === 'ai').map(m => ({ role: m.role, content: m.content })),
+        { role: 'user', content: userMsg }
+      ];
+      const res = await fetch('https://api.x.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+        body: JSON.stringify({ model: 'grok-2-latest', messages, stream: true })
+      });
+      if (!res.ok || !res.body) throw new Error('API error');
+      setChatLog(prev => [...prev, { role: 'ai', content: '' }]);
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6).trim();
+            if (data === '[DONE]') continue;
+            try {
+              const parsed = JSON.parse(data);
+              const delta = parsed.choices?.[0]?.delta?.content || '';
+              if (delta) {
+                setChatLog(prev => {
+                  const copy = [...prev];
+                  const last = { ...copy[copy.length - 1], content: copy[copy.length - 1].content + delta };
+                  copy[copy.length - 1] = last;
+                  return copy;
+                });
+              }
+            } catch {}
+          }
+        }
       }
     } catch (e) {
       toast.error('AI Assistant error');

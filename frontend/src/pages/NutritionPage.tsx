@@ -3,7 +3,7 @@ import { nutritionApi } from '../api/nutrition';
 import { DailyNutritionSummary, FoodLog } from '../types';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
-import { Plus, Trash2, PieChart as PieChartIcon } from 'lucide-react';
+import { Plus, Trash2, Utensils, PieChart as PieChartIcon } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 export default function NutritionPage() {
@@ -13,6 +13,9 @@ export default function NutritionPage() {
 
   // Form state
   const [showForm, setShowForm] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searching, setSearching] = useState(false);
   const [formData, setFormData] = useState({
     foodName: '',
     mealCategory: 'BREAKFAST',
@@ -22,6 +25,35 @@ export default function NutritionPage() {
     fatG: '',
     fiberG: '',
   });
+
+  const handleSearch = async (query: string) => {
+    setSearchQuery(query);
+    if (query.length < 2) { setSearchResults([]); return; }
+    setSearching(true);
+    try {
+      const res = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&json=1&page_size=5`);
+      const data = await res.json();
+      setSearchResults(data.products || []);
+    } catch { setSearchResults([]); }
+    finally { setSearching(false); }
+  };
+
+  const selectFood = (product: any) => {
+    const nutriments = product.nutriments || {};
+    setFormData({
+      foodName: product.product_name || product.product_name_en || searchQuery,
+      mealCategory: formData.mealCategory,
+      calories: String(Math.round(nutriments['energy-kcal_100g'] || nutriments['energy_100g'] || 0)),
+      proteinG: String(Math.round(nutriments.proteins_100g || 0)),
+      carbsG: String(Math.round(nutriments.carbohydrates_100g || 0)),
+      fatG: String(Math.round(nutriments.fat_100g || 0)),
+      fiberG: String(Math.round(nutriments.fiber_100g || 0)),
+    });
+    setSearchQuery('');
+    setSearchResults([]);
+  };
+
+  useEffect(() => { document.title = 'Nutrition - FitMind'; }, []);
 
   useEffect(() => {
     loadData();
@@ -41,25 +73,54 @@ export default function NutritionPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const payload = {
+      ...formData,
+      date,
+      calories: parseFloat(formData.calories) || 0,
+      proteinG: parseFloat(formData.proteinG) || 0,
+      carbsG: parseFloat(formData.carbsG) || 0,
+      fatG: parseFloat(formData.fatG) || 0,
+      fiberG: parseFloat(formData.fiberG) || 0,
+    };
+    const optimistic: FoodLog = {
+      id: -Date.now(),
+      date,
+      mealCategory: payload.mealCategory,
+      foodName: payload.foodName,
+      servingSize: 1,
+      unit: 'serving',
+      calories: payload.calories,
+      proteinG: payload.proteinG,
+      carbsG: payload.carbsG,
+      fatG: payload.fatG,
+      fiberG: payload.fiberG,
+      loggedAt: new Date().toISOString(),
+    };
+    setSummary(prev => prev ? { ...prev, meals: [...prev.meals, optimistic], totalCalories: prev.totalCalories + optimistic.calories, totalProtein: prev.totalProtein + optimistic.proteinG, totalCarbs: prev.totalCarbs + optimistic.carbsG, totalFat: prev.totalFat + optimistic.fatG } : prev);
+    setShowForm(false);
+    setFormData({ foodName: '', mealCategory: 'BREAKFAST', calories: '', proteinG: '', carbsG: '', fatG: '', fiberG: '' });
     try {
-      const payload = {
-        ...formData,
-        date,
-        calories: parseFloat(formData.calories) || 0,
-        proteinG: parseFloat(formData.proteinG) || 0,
-        carbsG: parseFloat(formData.carbsG) || 0,
-        fatG: parseFloat(formData.fatG) || 0,
-        fiberG: parseFloat(formData.fiberG) || 0,
-      };
       const res = await nutritionApi.logFood(payload);
       if (res.success) {
         toast.success('Food logged!');
-        setShowForm(false);
-        setFormData({ foodName: '', mealCategory: 'BREAKFAST', calories: '', proteinG: '', carbsG: '', fatG: '', fiberG: '' });
-        loadData();
       }
+      loadData();
     } catch (e) {
       toast.error('Failed to log food');
+      loadData();
+    }
+  };
+
+  const handleDeleteLog = async (id: number) => {
+    if (!window.confirm('Delete this food log entry?')) return;
+    setSummary(prev => prev ? { ...prev, meals: prev.meals.filter(m => m.id !== id) } : prev);
+    try {
+      await nutritionApi.deleteLog(id);
+      toast.success('Food log deleted');
+      loadData();
+    } catch (e) {
+      toast.error('Failed to delete food log');
+      loadData();
     }
   };
 
@@ -84,7 +145,12 @@ export default function NutritionPage() {
                   {m.proteinG}g P • {m.carbsG}g C • {m.fatG}g F
                 </p>
               </div>
-              <span className="font-semibold">{m.calories} kcal</span>
+              <div className="flex items-center gap-3">
+                <span className="font-semibold">{m.calories} kcal</span>
+                <button onClick={() => handleDeleteLog(m.id)} className="text-red-400 hover:text-red-300 transition-colors">
+                  <Trash2 size={16} />
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -116,6 +182,21 @@ export default function NutritionPage() {
         <div className="card-glass animate-fade-in">
           <h3 className="font-semibold mb-4">Log Food</h3>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="form-group mb-0 relative">
+              <label className="label">Search Food (Open Food Facts)</label>
+              <input type="text" className="input" placeholder="e.g., chicken breast..." value={searchQuery} onChange={e => handleSearch(e.target.value)} />
+              {searching && <p className="text-xs text-secondary mt-1">Searching...</p>}
+              {searchResults.length > 0 && (
+                <div className="absolute z-20 top-full left-0 right-0 bg-[#1c2128] border border-[rgba(48,54,61,0.8)] rounded-lg mt-1 max-h-48 overflow-y-auto shadow-xl">
+                  {searchResults.map((p, i) => (
+                    <button key={i} type="button" className="w-full text-left px-3 py-2 text-sm hover:bg-[rgba(59,130,246,0.1)] transition-colors border-b border-[rgba(48,54,61,0.5)] last:border-b-0" onClick={() => selectFood(p)}>
+                      <span className="font-medium">{p.product_name || p.product_name_en || 'Unknown'}</span>
+                      <span className="text-secondary ml-2">{Math.round((p.nutriments?.['energy-kcal_100g'] || p.nutriments?.energy_100g || 0))} kcal/100g</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <div className="form-group mb-0">
               <label className="label">Food Name</label>
               <input type="text" className="input" required value={formData.foodName} onChange={e => setFormData({...formData, foodName: e.target.value})} />
@@ -213,5 +294,3 @@ export default function NutritionPage() {
   );
 }
 
-// Ensure Utensils icon is imported
-import { Utensils } from 'lucide-react';

@@ -116,7 +116,11 @@ p { line-height: 1.5; color: var(--text-secondary); }
   transition: var(--transition);
 }
 
-.card-glass:hover {
+.card-interactive {
+  cursor: pointer;
+}
+
+.card-interactive:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-glow);
   border-color: rgba(59, 130, 246, 0.3);

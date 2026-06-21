@@ -1,18 +1,27 @@
 import { ApiResponse, DailyNutritionSummary, MacroDistribution, FoodLog } from '../types';
-import { mockDailyDashboard } from './mockData';
-
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+import { api } from './axios';
 
 export const nutritionApi = {
   logFood: async (data: any) => {
-    await delay(1000);
-    return { success: true, data: { ...data, id: Math.random() } } as ApiResponse<FoodLog>;
+    const res = await api.post<ApiResponse<FoodLog>>('/nutrition/log', data);
+    return res.data;
   },
   getDailyAnalytics: async (date: string) => {
-    await delay(800);
-    return { success: true, data: mockDailyDashboard.nutritionSummary } as ApiResponse<DailyNutritionSummary>;
+    const res = await api.get<ApiResponse<DailyNutritionSummary>>('/nutrition/analytics/daily', { params: { date } });
+    return res.data;
   },
   getMacros: async (from: string, to: string) => {
-    return { success: true, data: null as any } as any;
+    const res = await api.get<ApiResponse<MacroDistribution>>('/nutrition/analytics/macros', { params: { from, to } });
+    return res.data;
+  },
+  deleteLog: async (id: number) => {
+    const res = await api.delete<ApiResponse<void>>(`/nutrition/log/${id}`);
+    return res.data;
+  },
+  getLogs: async (date: string, category?: string) => {
+    const params: any = { date };
+    if (category) params.category = category;
+    const res = await api.get<ApiResponse<FoodLog[]>>('/nutrition/logs', { params });
+    return res.data;
   }
 };
