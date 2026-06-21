@@ -16,6 +16,8 @@ export default function NutritionPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
+  const [servingG, setServingG] = useState(100);
+  const [basePer100g, setBasePer100g] = useState<Record<string, number>>({});
   const [formData, setFormData] = useState({
     foodName: '',
     mealCategory: 'BREAKFAST',
@@ -26,12 +28,24 @@ export default function NutritionPage() {
     fiberG: '',
   });
 
+  const applyServingScale = (base: Record<string, number>, serving: number) => {
+    const ratio = serving / 100;
+    setFormData(prev => ({
+      ...prev,
+      calories: String(Math.round((base.calories || 0) * ratio)),
+      proteinG: String(Math.round((base.proteinG || 0) * ratio)),
+      carbsG: String(Math.round((base.carbsG || 0) * ratio)),
+      fatG: String(Math.round((base.fatG || 0) * ratio)),
+      fiberG: String(Math.round((base.fiberG || 0) * ratio)),
+    }));
+  };
+
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
-    if (query.length < 2) { setSearchResults([]); return; }
+    if (query.length < 3) { setSearchResults([]); return; }
     setSearching(true);
     try {
-      const res = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&json=1&page_size=5`);
+      const res = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=8&fields=product_name,brands,nutriments`);
       const data = await res.json();
       setSearchResults(data.products || []);
     } catch { setSearchResults([]); }
@@ -39,16 +53,22 @@ export default function NutritionPage() {
   };
 
   const selectFood = (product: any) => {
-    const nutriments = product.nutriments || {};
-    setFormData({
+    const n = product.nutriments || {};
+    const kcal = n['energy-kcal_100g'] ?? Math.round((n['energy_100g'] || 0) / 4.184);
+    const base = {
+      calories: kcal,
+      proteinG: Math.round(n.proteins_100g || 0),
+      carbsG: Math.round(n.carbohydrates_100g || 0),
+      fatG: Math.round(n.fat_100g || 0),
+      fiberG: Math.round(n.fiber_100g || 0),
+    };
+    setBasePer100g(base);
+    setServingG(100);
+    applyServingScale(base, 100);
+    setFormData(prev => ({
+      ...prev,
       foodName: product.product_name || product.product_name_en || searchQuery,
-      mealCategory: formData.mealCategory,
-      calories: String(Math.round(nutriments['energy-kcal_100g'] || nutriments['energy_100g'] || 0)),
-      proteinG: String(Math.round(nutriments.proteins_100g || 0)),
-      carbsG: String(Math.round(nutriments.carbohydrates_100g || 0)),
-      fatG: String(Math.round(nutriments.fat_100g || 0)),
-      fiberG: String(Math.round(nutriments.fiber_100g || 0)),
-    });
+    }));
     setSearchQuery('');
     setSearchResults([]);
   };
@@ -182,20 +202,28 @@ export default function NutritionPage() {
         <div className="card-glass animate-fade-in">
           <h3 className="font-semibold mb-4">Log Food</h3>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="form-group mb-0 relative">
+            <div className="form-group mb-0 relative" onBlur={() => setTimeout(() => setSearchResults([]), 200)}>
               <label className="label">Search Food (Open Food Facts)</label>
               <input type="text" className="input" placeholder="e.g., chicken breast..." value={searchQuery} onChange={e => handleSearch(e.target.value)} />
               {searching && <p className="text-xs text-secondary mt-1">Searching...</p>}
               {searchResults.length > 0 && (
                 <div className="absolute z-20 top-full left-0 right-0 bg-[#1c2128] border border-[rgba(48,54,61,0.8)] rounded-lg mt-1 max-h-48 overflow-y-auto shadow-xl">
-                  {searchResults.map((p, i) => (
-                    <button key={i} type="button" className="w-full text-left px-3 py-2 text-sm hover:bg-[rgba(59,130,246,0.1)] transition-colors border-b border-[rgba(48,54,61,0.5)] last:border-b-0" onClick={() => selectFood(p)}>
-                      <span className="font-medium">{p.product_name || p.product_name_en || 'Unknown'}</span>
-                      <span className="text-secondary ml-2">{Math.round((p.nutriments?.['energy-kcal_100g'] || p.nutriments?.energy_100g || 0))} kcal/100g</span>
-                    </button>
-                  ))}
+                  {searchResults.map((p, i) => {
+                    const n = p.nutriments || {};
+                    const kcal = n['energy-kcal_100g'] ?? Math.round((n['energy_100g'] || 0) / 4.184);
+                    return (
+                      <button key={i} type="button" className="w-full text-left px-3 py-2 text-sm hover:bg-[rgba(59,130,246,0.1)] transition-colors border-b border-[rgba(48,54,61,0.5)] last:border-b-0" onMouseDown={() => selectFood(p)}>
+                        <span className="font-medium">{p.product_name || p.product_name_en || 'Unknown'}</span>
+                        <span className="text-secondary ml-2">{kcal} kcal/100g</span>
+                      </button>
+                    );
+                  })}
                 </div>
               )}
+            </div>
+            <div className="form-group mb-0">
+              <label className="label">Serving Size (g)</label>
+              <input type="number" className="input" min={1} value={servingG} onChange={e => { const v = parseInt(e.target.value) || 100; setServingG(v); if (Object.keys(basePer100g).length) applyServingScale(basePer100g, v); }} />
             </div>
             <div className="form-group mb-0">
               <label className="label">Food Name</label>

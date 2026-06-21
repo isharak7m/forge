@@ -22,6 +22,9 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const today = format(new Date(), 'yyyy-MM-dd');
   const targetCalories = useMemo(() => calculateTDEE(user || {}), [user]);
+  const proteinTarget = Math.round((user?.currentWeightKg || 80) * 2);
+  const fatTarget = Math.round((targetCalories * 0.25) / 9);
+  const carbTarget = Math.round((targetCalories - proteinTarget * 4 - fatTarget * 9) / 4);
 
   useEffect(() => { document.title = 'Dashboard - FitMind'; }, []);
 
@@ -159,30 +162,30 @@ export default function DashboardPage() {
               <div>
                  <div className="flex justify-between text-sm mb-2">
                     <span>Protein</span>
-                    <span className="text-green-400">{data.nutritionSummary.totalProtein.toFixed(0)}g / 150g</span>
-                 </div>
-                 <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                    <div className="h-full bg-green-400 rounded-full" style={{ width: `${Math.min(100, (data.nutritionSummary.totalProtein / 150) * 100)}%` }}></div>
+                     <span className="text-green-400">{data.nutritionSummary.totalProtein.toFixed(0)}g / {proteinTarget}g</span>
+                  </div>
+                  <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                     <div className="h-full bg-green-400 rounded-full" style={{ width: `${Math.min(100, (data.nutritionSummary.totalProtein / proteinTarget) * 100)}%` }}></div>
                  </div>
               </div>
               
               <div>
                  <div className="flex justify-between text-sm mb-2">
                     <span>Carbs</span>
-                    <span className="text-orange-400">{data.nutritionSummary.totalCarbs.toFixed(0)}g / 250g</span>
-                 </div>
-                 <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                    <div className="h-full bg-orange-400 rounded-full" style={{ width: `${Math.min(100, (data.nutritionSummary.totalCarbs / 250) * 100)}%` }}></div>
+                     <span className="text-orange-400">{data.nutritionSummary.totalCarbs.toFixed(0)}g / {carbTarget}g</span>
+                  </div>
+                  <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                     <div className="h-full bg-orange-400 rounded-full" style={{ width: `${Math.min(100, (data.nutritionSummary.totalCarbs / carbTarget) * 100)}%` }}></div>
                  </div>
               </div>
 
               <div>
                  <div className="flex justify-between text-sm mb-2">
                     <span>Fat</span>
-                    <span className="text-purple-400">{data.nutritionSummary.totalFat.toFixed(0)}g / 70g</span>
-                 </div>
-                 <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                    <div className="h-full bg-purple-400 rounded-full" style={{ width: `${Math.min(100, (data.nutritionSummary.totalFat / 70) * 100)}%` }}></div>
+                     <span className="text-purple-400">{data.nutritionSummary.totalFat.toFixed(0)}g / {fatTarget}g</span>
+                  </div>
+                  <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                     <div className="h-full bg-purple-400 rounded-full" style={{ width: `${Math.min(100, (data.nutritionSummary.totalFat / fatTarget) * 100)}%` }}></div>
                  </div>
               </div>
            </div>
