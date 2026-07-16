@@ -39,21 +39,65 @@ export default function LoginPage() {
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.4 }}
-        className="hidden lg:flex flex-col justify-between w-[420px] flex-shrink-0 p-10 relative overflow-hidden"
-        style={{ background: 'rgba(255, 255, 255, 0.92)', borderRight: '1px solid var(--border)' }}
+        className="hidden lg:flex flex-col items-center justify-center w-[420px] flex-shrink-0 p-10 relative overflow-hidden"
+        style={{
+          background: 'linear-gradient(135deg, #f8faff 0%, #f0f4ff 50%, #f5f3ff 100%)',
+          borderRight: '1px solid var(--border)'
+        }}
       >
-        <div className="relative z-10">
-          <div className="flex items-center gap-2.5 mb-12">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--primary)' }}>
-              <Zap size={16} className="text-white" />
-            </div>
-            <span className="text-lg font-semibold text-white" style={{ letterSpacing: '-0.02em' }}>Forge</span>
-          </div>
+        {/* Subtle decorative circles */}
+        <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full" style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%)' }} />
+        <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full" style={{ background: 'radial-gradient(circle, rgba(168,85,247,0.05) 0%, transparent 70%)' }} />
+
+        <div className="relative z-10 flex flex-col items-center text-center">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.1, duration: 0.4 }}
+            className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
+            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+          >
+            <Zap size={24} className="text-white" />
+          </motion.div>
+
+          <motion.h1
+            initial={{ y: 8, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+            className="text-3xl font-bold tracking-tight mb-2"
+            style={{ color: '#111827', letterSpacing: '-0.03em' }}
+          >
+            Forge
+          </motion.h1>
+
+          <motion.p
+            initial={{ y: 8, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.4 }}
+            className="text-sm font-medium"
+            style={{ color: '#6b7280' }}
+          >
+            Your AI Fitness Companion
+          </motion.p>
+
+          <motion.div
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+            className="h-px w-12 mt-6 origin-center"
+            style={{ background: 'linear-gradient(90deg, transparent, #c7d2fe, transparent)' }}
+          />
         </div>
 
-        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6, duration: 0.4 }}
+          className="absolute bottom-8 text-xs"
+          style={{ color: '#9ca3af' }}
+        >
           &copy; 2025 Forge &middot; All rights reserved
-        </p>
+        </motion.p>
       </motion.div>
 
       {/* Right panel */}
