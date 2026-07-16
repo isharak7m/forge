@@ -5,7 +5,7 @@ spring:
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://db.rnorqsktpuvenjqmucbq.supabase.co:5432/postgres?sslmode=require}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:Metagross@4150}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   flyway:
@@ -35,7 +35,7 @@ server:
 
 # JWT Configuration
 jwt:
-  secret: ${JWT_SECRET:fitmind-super-secret-key-for-jwt-token-signing-must-be-at-least-256-bits-long}
+  secret: ${JWT_SECRET}
   expiration: 86400000  # 24 hours in milliseconds
 
 # SpringDoc OpenAPI
