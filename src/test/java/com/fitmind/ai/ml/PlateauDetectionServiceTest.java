@@ -1,8 +1,9 @@
 package com.fitmind.ai.ml;
 
-import com.fitmind.entity.BodyMetric;
+import com.fitmind.entity.ExerciseLog;
 import com.fitmind.entity.User;
-import com.fitmind.repository.BodyMetricRepository;
+import com.fitmind.entity.WorkoutSession;
+import com.fitmind.entity.enums.ExerciseCategory;
 import com.fitmind.repository.ExerciseLogRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
@@ -23,9 +23,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("PlateauDetectionService Tests")
 class PlateauDetectionServiceTest {
-
-    @Mock
-    private BodyMetricRepository bodyMetricRepository;
 
     @Mock
     private ExerciseLogRepository exerciseLogRepository;
@@ -44,66 +41,53 @@ class PlateauDetectionServiceTest {
     }
 
     @Test
-    @DisplayName("Should detect weight plateau when weight variation is minimal")
-    void detectPlateaus_ShouldDetectWeightPlateau_WhenVariationUnder0_5kg() {
-        List<BodyMetric> metrics = new ArrayList<>();
-        double[] stagnantWeights = {78.0, 78.1, 78.0, 78.2, 78.1, 78.0, 78.1};
-        LocalDate base = LocalDate.now().minusDays(20);
-
-        for (int i = 0; i < stagnantWeights.length; i++) {
-            metrics.add(BodyMetric.builder()
-                    .user(testUser)
-                    .recordedDate(base.plusDays(i * 3))
-                    .weightKg(stagnantWeights[i])
-                    .build());
-        }
-
-        when(bodyMetricRepository.findByUserIdAndRecordedDateBetweenOrderByRecordedDateAsc(
-                anyLong(), any(), any())).thenReturn(metrics);
+    @DisplayName("Should not detect plateau when exercise data is empty")
+    void detectPlateaus_ShouldReturnEmpty_WhenNoExercises() {
         when(exerciseLogRepository.findDistinctExerciseNamesByUserId(anyLong()))
                 .thenReturn(List.of());
 
         var alerts = plateauDetectionService.detectPlateaus(1L);
 
-        assertThat(alerts).isNotEmpty();
-        assertThat(alerts).anyMatch(a -> a.getType().equals("WEIGHT"));
+        assertThat(alerts).isEmpty();
     }
 
     @Test
-    @DisplayName("Should NOT detect plateau when weight is actively changing")
-    void detectPlateaus_ShouldNotDetectPlateau_WhenWeightChanging() {
-        List<BodyMetric> metrics = new ArrayList<>();
-        double[] changingWeights = {80.0, 79.5, 79.0, 78.5, 78.0, 77.5, 77.0};
-        LocalDate base = LocalDate.now().minusDays(20);
-
-        for (int i = 0; i < changingWeights.length; i++) {
-            metrics.add(BodyMetric.builder()
-                    .user(testUser)
-                    .recordedDate(base.plusDays(i * 3))
-                    .weightKg(changingWeights[i])
-                    .build());
-        }
-
-        when(bodyMetricRepository.findByUserIdAndRecordedDateBetweenOrderByRecordedDateAsc(
-                anyLong(), any(), any())).thenReturn(metrics);
-        when(exerciseLogRepository.findDistinctExerciseNamesByUserId(anyLong()))
-                .thenReturn(List.of());
-
-        var alerts = plateauDetectionService.detectPlateaus(1L);
-
-        assertThat(alerts).noneMatch(a -> a.getType().equals("WEIGHT"));
-    }
-
-    @Test
-    @DisplayName("Should return empty list when insufficient data")
+    @DisplayName("Should not detect plateau with insufficient exercise data")
     void detectPlateaus_ShouldReturnEmpty_WhenInsufficientData() {
-        when(bodyMetricRepository.findByUserIdAndRecordedDateBetweenOrderByRecordedDateAsc(
-                anyLong(), any(), any())).thenReturn(List.of());
         when(exerciseLogRepository.findDistinctExerciseNamesByUserId(anyLong()))
-                .thenReturn(List.of());
+                .thenReturn(List.of("Bench Press"));
+        when(exerciseLogRepository.findByUserIdAndExerciseNameOrderByDate(anyLong(), anyString()))
+                .thenReturn(List.of(
+                        ExerciseLog.builder().exerciseName("Bench Press").category(ExerciseCategory.STRENGTH).weightKg(60.0).reps(10).sets(3).build(),
+                        ExerciseLog.builder().exerciseName("Bench Press").category(ExerciseCategory.STRENGTH).weightKg(60.0).reps(10).sets(3).build()
+                ));
 
         var alerts = plateauDetectionService.detectPlateaus(1L);
 
-        assertThat(alerts).noneMatch(a -> a.getType().equals("WEIGHT"));
+        assertThat(alerts).noneMatch(a -> a.getType().equals("STRENGTH"));
+    }
+
+    @Test
+    @DisplayName("Should detect strength plateau when volume is stagnant")
+    void detectPlateaus_ShouldDetectStrengthPlateau_WhenVolumeStagnant() {
+        WorkoutSession ws = WorkoutSession.builder().id(1L).user(testUser).date(LocalDate.now()).build();
+
+        List<ExerciseLog> stagnantLogs = List.of(
+                ExerciseLog.builder().workoutSession(ws).exerciseName("Bench Press").category(ExerciseCategory.STRENGTH).weightKg(60.0).reps(10).sets(3).build(),
+                ExerciseLog.builder().workoutSession(ws).exerciseName("Bench Press").category(ExerciseCategory.STRENGTH).weightKg(60.0).reps(10).sets(3).build(),
+                ExerciseLog.builder().workoutSession(ws).exerciseName("Bench Press").category(ExerciseCategory.STRENGTH).weightKg(60.0).reps(10).sets(3).build(),
+                ExerciseLog.builder().workoutSession(ws).exerciseName("Bench Press").category(ExerciseCategory.STRENGTH).weightKg(60.0).reps(10).sets(3).build(),
+                ExerciseLog.builder().workoutSession(ws).exerciseName("Bench Press").category(ExerciseCategory.STRENGTH).weightKg(60.0).reps(10).sets(3).build(),
+                ExerciseLog.builder().workoutSession(ws).exerciseName("Bench Press").category(ExerciseCategory.STRENGTH).weightKg(60.0).reps(10).sets(3).build()
+        );
+
+        when(exerciseLogRepository.findDistinctExerciseNamesByUserId(anyLong()))
+                .thenReturn(List.of("Bench Press"));
+        when(exerciseLogRepository.findByUserIdAndExerciseNameOrderByDate(anyLong(), anyString()))
+                .thenReturn(stagnantLogs);
+
+        var alerts = plateauDetectionService.detectPlateaus(1L);
+
+        assertThat(alerts).anyMatch(a -> a.getType().equals("STRENGTH"));
     }
 }

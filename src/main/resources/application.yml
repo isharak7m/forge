@@ -3,19 +3,27 @@ spring:
     name: FitMind
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/fitmind
-    username: fitmind_user
-    password: fitmind_pass
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://db.rnorqsktpuvenjqmucbq.supabase.co:5432/postgres?sslmode=require}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:Metagross@4150}
     driver-class-name: org.postgresql.Driver
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+        jdbc.batch_size: 100
+        order_inserts: true
+        order_updates: true
 
   jackson:
     serialization:
@@ -27,7 +35,7 @@ server:
 
 # JWT Configuration
 jwt:
-  secret: fitmind-super-secret-key-for-jwt-token-signing-must-be-at-least-256-bits-long
+  secret: ${JWT_SECRET:fitmind-super-secret-key-for-jwt-token-signing-must-be-at-least-256-bits-long}
   expiration: 86400000  # 24 hours in milliseconds
 
 # SpringDoc OpenAPI
@@ -49,9 +57,9 @@ logging:
     org.springframework.security: WARN
     org.hibernate.SQL: WARN
 
-# CORS
+# CORS — add your production domain here
 cors:
-  allowed-origins: "http://localhost:5173,http://localhost:3000"
+  allowed-origins: "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000,https://fitmind.vercel.app"
   allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
   allowed-headers: "*"
   max-age: 3600

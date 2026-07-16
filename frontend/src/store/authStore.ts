@@ -32,7 +32,7 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: 'fitmind_auth',
+      name: 'forge_auth',
     }
   )
 );

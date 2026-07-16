@@ -1,5 +1,6 @@
 package com.fitmind.entity;
 
+import com.fitmind.entity.enums.CardioZone;
 import com.fitmind.entity.enums.ExerciseCategory;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,6 +30,12 @@ public class ExerciseLog {
     private Integer sets;
     private Integer reps;
     private Double weightKg;
-    private Integer rpe; // Rate of Perceived Exertion (1-10)
+    private Integer rpe;
+
+    private Integer duration;
+
+    @Enumerated(EnumType.STRING)
+    private CardioZone zone;
+
     private String notes;
 }

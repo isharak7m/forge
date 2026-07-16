@@ -8,8 +8,8 @@ import com.fitmind.dto.ai.Recommendation;
 import com.fitmind.entity.User;
 import com.fitmind.entity.enums.FitnessGoal;
 import com.fitmind.entity.enums.Gender;
-import com.fitmind.repository.BodyMetricRepository;
 import com.fitmind.repository.FoodLogRepository;
+import com.fitmind.repository.SleepLogRepository;
 import com.fitmind.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,17 +25,17 @@ public class RecommendationService {
     private final PredictionService predictionService;
     private final PlateauDetectionService plateauService;
     private final AdherenceService adherenceService;
-    private final BodyMetricRepository metricRepository;
     private final FoodLogRepository foodRepository;
+    private final SleepLogRepository sleepLogRepository;
     private final UserRepository userRepository;
 
     public List<Recommendation> generateRecommendations(Long userId) {
         User user = userRepository.findById(userId).orElseThrow();
         List<Recommendation> recs = new ArrayList<>();
-        
+
         var plateaus = plateauService.detectPlateaus(userId);
         var adherence = adherenceService.calculateAdherence(userId);
-        
+
         LocalDate twoWeeksAgo = LocalDate.now().minusDays(14);
         Double avgCalories = foodRepository.sumCaloriesByUserIdAndDateBetween(userId, twoWeeksAgo, LocalDate.now());
         if (avgCalories != null) avgCalories /= 14.0;
@@ -81,7 +81,7 @@ public class RecommendationService {
         }
 
         // Rule 4: Poor Sleep
-        Double avgSleep = metricRepository.avgSleepHoursByUserIdAndDateBetween(userId, twoWeeksAgo, LocalDate.now());
+        Double avgSleep = sleepLogRepository.avgSleepHoursByUserIdAndDateBetween(userId, twoWeeksAgo, LocalDate.now());
         if (avgSleep != null && avgSleep < 7.0) {
             recs.add(Recommendation.builder()
                     .category("RECOVERY")
@@ -104,7 +104,7 @@ public class RecommendationService {
                     .actionItem("Review current schedule")
                     .build());
         }
-        
+
         // Rule 6: Protein Need
         Double totalProtein = foodRepository.sumProteinByUserIdAndDateBetween(userId, twoWeeksAgo, LocalDate.now());
         double weight = user.getCurrentWeightKg() != null ? user.getCurrentWeightKg() : 70.0;
@@ -126,7 +126,7 @@ public class RecommendationService {
         double weight = user.getCurrentWeightKg() != null ? user.getCurrentWeightKg() : 70.0;
         double height = user.getHeightCm() != null ? user.getHeightCm() : 170.0;
         int age = user.getAge() != null ? user.getAge() : 30;
-        
+
         double bmr = (10 * weight) + (6.25 * height) - (5 * age);
         if (user.getGender() == Gender.MALE) bmr += 5;
         else if (user.getGender() == Gender.FEMALE) bmr -= 161;
@@ -139,7 +139,7 @@ public class RecommendationService {
             case EXTRA_ACTIVE -> 1.9;
             default -> 1.55;
         };
-        
+
         return bmr * multiplier;
     }
 }

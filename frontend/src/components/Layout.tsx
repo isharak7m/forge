@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Activity, Brain, PieChart, TrendingUp, Settings, LogOut, LayoutDashboard } from 'lucide-react';
+import { Activity, PieChart, TrendingUp, Settings, LogOut, LayoutDashboard, Zap, User } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
@@ -9,106 +10,151 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   const pageTitleMap: Record<string, string> = {
     '/dashboard': 'Dashboard',
-    '/nutrition': 'Nutrition Tracker',
-    '/workouts': 'Workout Log',
-    '/metrics': 'Body Metrics',
-    '/ai': 'AI Fitness Hub',
-    '/profile': 'Profile Settings',
+    '/nutrition': 'Nutrition',
+    '/workouts': 'Workouts',
+    '/metrics': 'Metrics',
+    '/profile': 'Profile',
   };
-  const pageTitle = pageTitleMap[location.pathname] || 'FitMind';
+  const pageTitle = pageTitleMap[location.pathname] || 'Forge';
 
   const links = [
     { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/nutrition', icon: PieChart, label: 'Nutrition' },
     { to: '/workouts', icon: Activity, label: 'Workouts' },
     { to: '/metrics', icon: TrendingUp, label: 'Metrics' },
-    { to: '/ai', icon: Brain, label: 'AI Hub' },
     { to: '/profile', icon: Settings, label: 'Profile' },
   ];
 
   return (
-    <div className="flex min-h-screen bg-primary">
+    <div className="flex min-h-screen" style={{ background: 'var(--bg)' }}>
       {/* Sidebar */}
-      <div className="w-64 bg-[#161b22] border-r border-[rgba(48,54,61,0.8)] flex-col hidden md:flex fixed h-full z-10">
-        <div className="p-6 flex items-center gap-3">
-          <div className="p-2 bg-gradient-blue rounded-lg">
-            <Brain size={24} className="text-white" />
+      <motion.nav
+        initial={{ x: -60, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 0.4 }}
+        className="w-56 flex-col hidden md:flex fixed h-full z-10"
+        style={{
+          background: 'rgba(255, 255, 255, 0.92)',
+          backdropFilter: 'blur(20px)',
+          borderRight: '1px solid var(--border)',
+        }}
+      >
+        <div className="p-5 pb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--primary)' }}>
+              <Zap size={16} className="text-white" />
+            </div>
+            <span className="text-base font-semibold text-white" style={{ letterSpacing: '-0.02em' }}>Forge</span>
           </div>
-          <h1 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-blue">FitMind</h1>
         </div>
 
-        <nav className="flex-1 px-4 py-6 flex flex-col gap-2">
+        <div className="flex-1 px-2.5 flex flex-col gap-0.5">
           {links.map((link) => {
             const Icon = link.icon;
             const isActive = location.pathname === link.to;
             return (
-              <Link
-                key={link.to}
-                to={link.to}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                  isActive 
-                    ? 'bg-[rgba(59,130,246,0.1)] text-blue-400 border border-[rgba(59,130,246,0.2)]' 
-                    : 'text-secondary hover:bg-[rgba(255,255,255,0.05)] hover:text-primary'
-                }`}
-              >
-                <Icon size={20} className={isActive ? 'text-blue-400' : ''} />
-                <span className="font-medium">{link.label}</span>
+              <Link key={link.to} to={link.to}>
+                <div
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all"
+                  style={{
+                    background: isActive ? 'hsla(var(--hue-primary), 60%, 50%, 0.08)' : 'transparent',
+                    color: isActive ? 'var(--primary-light)' : 'var(--text-muted)',
+                  }}
+                >
+                  <Icon size={16} />
+                  <span style={{ fontSize: '0.8125rem', fontWeight: isActive ? 500 : 400 }}>{link.label}</span>
+                </div>
               </Link>
             );
           })}
-        </nav>
+        </div>
 
-        <div className="p-4 border-t border-[rgba(48,54,61,0.8)]">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-full bg-gradient-green flex items-center justify-center font-bold text-white">
-              {user?.name?.charAt(0) || 'U'}
+        <div className="p-3 m-2.5 rounded-xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)' }}>
+          <div className="flex items-center gap-2.5 mb-2.5">
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-semibold text-white flex-shrink-0"
+              style={{ background: 'var(--primary)' }}
+            >
+              {user?.name?.charAt(0).toUpperCase() || 'U'}
             </div>
-            <div className="flex-1 overflow-hidden">
-              <p className="text-sm font-medium text-primary truncate">{user?.name}</p>
-              <p className="text-xs text-secondary truncate">{user?.email}</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-white truncate" style={{ fontWeight: 500 }}>{user?.name}</p>
+              <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{user?.email}</p>
             </div>
           </div>
-          <button 
+          <button
             onClick={logout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-[rgba(239,68,68,0.1)] rounded-lg transition-all"
+            className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs rounded-lg transition-all"
+            style={{ color: '#f87171', background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.08)' }}
           >
-            <LogOut size={16} />
-            Logout
+            <LogOut size={12} />
+            Sign Out
           </button>
         </div>
-      </div>
+      </motion.nav>
 
-      {/* Main Content */}
-      <div className="flex-1 md:ml-64 flex flex-col min-h-screen">
-        <header className="h-16 border-b border-[rgba(48,54,61,0.8)] bg-[rgba(22,27,34,0.8)] backdrop-blur-md sticky top-0 z-10 flex items-center px-6">
-           <h2 className="text-lg font-semibold text-primary capitalize">
-             {pageTitle}
-           </h2>
+      {/* Main */}
+      <div className="flex-1 md:ml-56 flex flex-col min-h-screen">
+        <header
+          className="h-12 flex items-center px-6 sticky top-0 z-10"
+          style={{
+            background: 'rgba(255, 255, 255, 0.85)',
+            backdropFilter: 'blur(12px)',
+            borderBottom: '1px solid var(--border)',
+          }}
+        >
+          <h2 style={{ fontSize: '0.9375rem', fontWeight: 600, color: 'var(--text)', letterSpacing: '-0.01em' }}>
+            {pageTitle}
+          </h2>
+          <div className="ml-auto flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--accent)' }} />
+            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Live</span>
+          </div>
         </header>
-        <main className="flex-1 p-6 pb-24 md:pb-6 max-w-7xl w-full mx-auto animate-fade-in">
-          {children}
+
+        <main className="flex-1 px-4 md:px-6 py-4 md:py-5 max-w-7xl w-full mx-auto" style={{ paddingBottom: 'calc(5.5rem + var(--safe-area-bottom, 0px))' }}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
 
       {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-secondary border-t border-[rgba(48,54,61,0.8)] flex justify-around items-center py-2 z-20">
+      <motion.nav
+        initial={{ y: 40 }}
+        animate={{ y: 0 }}
+        className="md:hidden fixed bottom-0 left-0 right-0 flex justify-around items-center z-20"
+        style={{
+          background: 'rgba(255, 255, 255, 0.94)',
+          backdropFilter: 'blur(16px)',
+          borderTop: '1px solid var(--border)',
+          paddingBottom: 'var(--safe-area-bottom, 0px)',
+          paddingTop: '0.375rem',
+          paddingLeft: '0.25rem',
+          paddingRight: '0.25rem',
+        }}
+      >
         {links.map((link) => {
           const Icon = link.icon;
           const isActive = location.pathname === link.to;
           return (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg transition-all ${
-                isActive ? 'text-blue-400' : 'text-secondary hover:text-primary'
-              }`}
+            <Link key={link.to} to={link.to} className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg flex-1"
+              style={{ color: isActive ? 'var(--primary-light)' : 'var(--text-muted)' }}
             >
               <Icon size={20} />
-              <span className="text-xs font-medium">{link.label}</span>
+              <span className="text-[10px]" style={{ fontWeight: 500 }}>{link.label}</span>
             </Link>
           );
         })}
-      </nav>
+      </motion.nav>
     </div>
   );
 };

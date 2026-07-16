@@ -6,8 +6,10 @@ import com.fitmind.dto.workout.PersonalRecord;
 import com.fitmind.dto.workout.ProgressionPoint;
 import com.fitmind.dto.workout.WorkoutSessionRequest;
 import com.fitmind.dto.workout.WorkoutSessionResponse;
+import com.fitmind.dto.ai.WorkoutPrediction;
 import com.fitmind.entity.User;
 import com.fitmind.service.WorkoutService;
+import com.fitmind.ai.ml.WorkoutPredictionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -28,6 +30,15 @@ import java.util.Map;
 public class WorkoutController {
 
     private final WorkoutService workoutService;
+    private final WorkoutPredictionService workoutPredictionService;
+
+    @GetMapping("/predict-1rm")
+    @Operation(summary = "Predict future 1RM for an exercise")
+    public ResponseEntity<ApiResponse<WorkoutPrediction>> predict1RM(
+            @AuthenticationPrincipal User user,
+            @RequestParam String exerciseName) {
+        return ResponseEntity.ok(ApiResponse.success(workoutPredictionService.predict1RM(user.getId(), exerciseName)));
+    }
 
     @PostMapping("/sessions")
     @Operation(summary = "Create workout session")

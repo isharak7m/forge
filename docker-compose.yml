@@ -1,49 +1,22 @@
-version: '3.8'
-
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: fitmind-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: fitmind
-      POSTGRES_USER: fitmind_user
-      POSTGRES_PASSWORD: fitmind_pass
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U fitmind_user -d fitmind"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: fitmind-pgadmin
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@fitmind.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "5050:80"
-    depends_on:
-      postgres:
-        condition: service_healthy
-
   backend:
-    build: .
-    container_name: fitmind-backend
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/fitmind
-      - SPRING_DATASOURCE_USERNAME=fitmind_user
-      - SPRING_DATASOURCE_PASSWORD=fitmind_pass
-    depends_on:
-      postgres:
-        condition: service_healthy
+    env_file:
+      - .env
+    restart: unless-stopped
 
-volumes:
-  postgres_data:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      - VITE_API_BASE_URL=/api
+    depends_on:
+      - backend
+    restart: unless-stopped

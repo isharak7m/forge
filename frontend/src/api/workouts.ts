@@ -7,11 +7,11 @@ export const workoutApi = {
     return res.data;
   },
   addExercise: async (sessionId: number, data: any) => {
-    const res = await api.post<ApiResponse<WorkoutSession>>(`/workouts/sessions/${sessionId}/exercises`, data);
+    const res = await api.post<ApiResponse<any>>(`/workouts/sessions/${sessionId}/exercises`, data);
     return res.data;
   },
   getSessions: async (from: string, to: string) => {
-    const res = await api.get<ApiResponse<WorkoutSession[]>>('/workouts/sessions', { params: { from, to } });
+    const res = await api.get<ApiResponse<WorkoutSession[]>>(`/workouts/sessions?from=${from}&to=${to}`);
     return res.data;
   },
   getPRs: async () => {
@@ -22,8 +22,8 @@ export const workoutApi = {
     const res = await api.get<ApiResponse<ProgressionPoint[]>>(`/workouts/exercises/${encodeURIComponent(exerciseName)}/progression`);
     return res.data;
   },
-  deleteSession: async (id: number) => {
-    const res = await api.delete<ApiResponse<void>>(`/workouts/sessions/${id}`);
+  predict1RM: async (exerciseName: string) => {
+    const res = await api.get<ApiResponse<any>>(`/workouts/predict-1rm?exerciseName=${encodeURIComponent(exerciseName)}`);
     return res.data;
   }
 };

@@ -7,16 +7,19 @@ import com.fitmind.dto.nutrition.MacroDistribution;
 import com.fitmind.entity.FoodLog;
 import com.fitmind.entity.User;
 import com.fitmind.entity.enums.MealCategory;
+import com.fitmind.exception.AuthException;
 import com.fitmind.exception.ResourceNotFoundException;
 import com.fitmind.repository.FoodLogRepository;
 import com.fitmind.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.temporal.WeekFields;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,6 +29,7 @@ public class NutritionService {
     private final FoodLogRepository foodLogRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public FoodLogResponse logFood(Long userId, FoodLogRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -42,6 +46,31 @@ public class NutritionService {
                 .carbsG(request.getCarbsG())
                 .fatG(request.getFatG())
                 .fiberG(request.getFiberG())
+                .vitaminA(request.getVitaminA())
+                .vitaminC(request.getVitaminC())
+                .vitaminD(request.getVitaminD())
+                .vitaminE(request.getVitaminE())
+                .vitaminK(request.getVitaminK())
+                .vitaminB1(request.getVitaminB1())
+                .vitaminB2(request.getVitaminB2())
+                .vitaminB3(request.getVitaminB3())
+                .vitaminB5(request.getVitaminB5())
+                .vitaminB6(request.getVitaminB6())
+                .vitaminB7(request.getVitaminB7())
+                .vitaminB9(request.getVitaminB9())
+                .vitaminB12(request.getVitaminB12())
+                .calcium(request.getCalcium())
+                .iron(request.getIron())
+                .magnesium(request.getMagnesium())
+                .potassium(request.getPotassium())
+                .sodium(request.getSodium())
+                .zinc(request.getZinc())
+                .copper(request.getCopper())
+                .manganese(request.getManganese())
+                .selenium(request.getSelenium())
+                .phosphorus(request.getPhosphorus())
+                .iodine(request.getIodine())
+                .chromium(request.getChromium())
                 .build();
 
         FoodLog saved = foodLogRepository.save(foodLog);
@@ -58,25 +87,67 @@ public class NutritionService {
         return logs.stream().map(this::mapToResponse).collect(Collectors.toList());
     }
 
+    @Transactional
     public void deleteLog(Long userId, Long logId) {
         FoodLog log = foodLogRepository.findById(logId)
                 .orElseThrow(() -> new ResourceNotFoundException("Food log not found"));
-        
+
         if (!log.getUser().getId().equals(userId)) {
-            throw new RuntimeException("Unauthorized to delete this log");
+            throw new AuthException("Unauthorized to delete this log");
         }
-        
+
         foodLogRepository.delete(log);
     }
 
     public DailyNutritionSummary getDailyAnalytics(Long userId, LocalDate date) {
         List<FoodLog> logs = foodLogRepository.findByUserIdAndDateOrderByLoggedAtAsc(userId, date);
         
-        double totalCalories = logs.stream().mapToDouble(FoodLog::getCalories).sum();
-        double totalProtein = logs.stream().mapToDouble(FoodLog::getProteinG).sum();
-        double totalCarbs = logs.stream().mapToDouble(FoodLog::getCarbsG).sum();
-        double totalFat = logs.stream().mapToDouble(FoodLog::getFatG).sum();
-        double totalFiber = logs.stream().mapToDouble(FoodLog::getFiberG).sum();
+        double totalCalories = logs.stream().mapToDouble(l -> l.getCalories() != null ? l.getCalories() : 0.0).sum();
+        double totalProtein = logs.stream().mapToDouble(l -> l.getProteinG() != null ? l.getProteinG() : 0.0).sum();
+        double totalCarbs = logs.stream().mapToDouble(l -> l.getCarbsG() != null ? l.getCarbsG() : 0.0).sum();
+        double totalFat = logs.stream().mapToDouble(l -> l.getFatG() != null ? l.getFatG() : 0.0).sum();
+        double totalFiber = logs.stream().mapToDouble(l -> l.getFiberG() != null ? l.getFiberG() : 0.0).sum();
+
+        Map<String, Double> micros = new LinkedHashMap<>();
+        String[] microFields = {"vitaminA","vitaminC","vitaminD","vitaminE","vitaminK",
+            "vitaminB1","vitaminB2","vitaminB3","vitaminB5","vitaminB6","vitaminB7","vitaminB9","vitaminB12",
+            "calcium","iron","magnesium","potassium","sodium","zinc","copper","manganese","selenium",
+            "phosphorus","iodine","chromium"};
+        for (String field : microFields) {
+            double sum = 0;
+            for (FoodLog l : logs) {
+                Double val = switch (field) {
+                    case "vitaminA" -> l.getVitaminA();
+                    case "vitaminC" -> l.getVitaminC();
+                    case "vitaminD" -> l.getVitaminD();
+                    case "vitaminE" -> l.getVitaminE();
+                    case "vitaminK" -> l.getVitaminK();
+                    case "vitaminB1" -> l.getVitaminB1();
+                    case "vitaminB2" -> l.getVitaminB2();
+                    case "vitaminB3" -> l.getVitaminB3();
+                    case "vitaminB5" -> l.getVitaminB5();
+                    case "vitaminB6" -> l.getVitaminB6();
+                    case "vitaminB7" -> l.getVitaminB7();
+                    case "vitaminB9" -> l.getVitaminB9();
+                    case "vitaminB12" -> l.getVitaminB12();
+                    case "calcium" -> l.getCalcium();
+                    case "iron" -> l.getIron();
+                    case "magnesium" -> l.getMagnesium();
+                    case "potassium" -> l.getPotassium();
+                    case "sodium" -> l.getSodium();
+                    case "zinc" -> l.getZinc();
+                    case "copper" -> l.getCopper();
+                    case "manganese" -> l.getManganese();
+                    case "selenium" -> l.getSelenium();
+                    case "phosphorus" -> l.getPhosphorus();
+                    case "iodine" -> l.getIodine();
+                    case "chromium" -> l.getChromium();
+                    default -> 0.0;
+                };
+                if (val != null) sum += val;
+            }
+            micros.put(field, Math.round(sum * 100.0) / 100.0);
+        }
 
         List<FoodLogResponse> meals = logs.stream().map(this::mapToResponse).collect(Collectors.toList());
         
@@ -87,16 +158,20 @@ public class NutritionService {
                 .totalCarbs(totalCarbs)
                 .totalFat(totalFat)
                 .totalFiber(totalFiber)
-                .consistencyScore(logs.isEmpty() ? 0.0 : 100.0) // For a single day, it's 0 or 100
+                .consistencyScore(calculateConsistencyScore(logs))
                 .meals(meals)
+                .micronutrients(micros)
                 .build();
     }
 
     public List<DailyNutritionSummary> getWeeklyAnalytics(Long userId, int week, int year) {
-        // Simplified: just get last 7 days from today for demonstration
-        // A full implementation would calculate dates from ISO week and year
-        LocalDate to = LocalDate.now();
-        LocalDate from = to.minusDays(6);
+        WeekFields weekFields = WeekFields.of(Locale.getDefault());
+        LocalDate firstDayOfYear = LocalDate.of(year, 1, 1);
+        LocalDate from = firstDayOfYear.with(weekFields.weekOfYear(), Math.min(week, 52)).with(DayOfWeek.MONDAY);
+        LocalDate to = from.plusDays(6);
+        if (to.isAfter(LocalDate.now())) {
+            to = LocalDate.now();
+        }
         return getAnalyticsForRange(userId, from, to);
     }
 
@@ -167,7 +242,41 @@ public class NutritionService {
                 .carbsG(log.getCarbsG())
                 .fatG(log.getFatG())
                 .fiberG(log.getFiberG())
+                .vitaminA(log.getVitaminA())
+                .vitaminC(log.getVitaminC())
+                .vitaminD(log.getVitaminD())
+                .vitaminE(log.getVitaminE())
+                .vitaminK(log.getVitaminK())
+                .vitaminB1(log.getVitaminB1())
+                .vitaminB2(log.getVitaminB2())
+                .vitaminB3(log.getVitaminB3())
+                .vitaminB5(log.getVitaminB5())
+                .vitaminB6(log.getVitaminB6())
+                .vitaminB7(log.getVitaminB7())
+                .vitaminB9(log.getVitaminB9())
+                .vitaminB12(log.getVitaminB12())
+                .calcium(log.getCalcium())
+                .iron(log.getIron())
+                .magnesium(log.getMagnesium())
+                .potassium(log.getPotassium())
+                .sodium(log.getSodium())
+                .zinc(log.getZinc())
+                .copper(log.getCopper())
+                .manganese(log.getManganese())
+                .selenium(log.getSelenium())
+                .phosphorus(log.getPhosphorus())
+                .iodine(log.getIodine())
+                .chromium(log.getChromium())
                 .loggedAt(log.getLoggedAt())
                 .build();
+    }
+
+    private double calculateConsistencyScore(List<FoodLog> logs) {
+        if (logs.isEmpty()) return 0.0;
+        Set<MealCategory> categories = logs.stream()
+                .map(FoodLog::getMealCategory)
+                .collect(Collectors.toSet());
+        double targetMeals = 4.0;
+        return Math.min(100.0, (categories.size() / targetMeals) * 100.0);
     }
 }
