@@ -41,13 +41,13 @@ export default function LoginPage() {
         transition={{ duration: 0.4 }}
         className="hidden lg:flex flex-col items-center justify-center w-[420px] flex-shrink-0 p-10 relative overflow-hidden"
         style={{
-          background: 'linear-gradient(135deg, #f8faff 0%, #f0f4ff 50%, #f5f3ff 100%)',
+          background: 'linear-gradient(135deg, #fefaf5 0%, #fdf6ee 50%, #faf1e8 100%)',
           borderRight: '1px solid var(--border)'
         }}
       >
         {/* Subtle decorative circles */}
-        <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full" style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%)' }} />
-        <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full" style={{ background: 'radial-gradient(circle, rgba(168,85,247,0.05) 0%, transparent 70%)' }} />
+        <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full" style={{ background: 'radial-gradient(circle, rgba(212,149,106,0.08) 0%, transparent 70%)' }} />
+        <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full" style={{ background: 'radial-gradient(circle, rgba(184,115,51,0.06) 0%, transparent 70%)' }} />
 
         <div className="relative z-10 flex flex-col items-center text-center">
           <motion.div
@@ -55,7 +55,7 @@ export default function LoginPage() {
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.1, duration: 0.4 }}
             className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
-            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+            style={{ background: 'linear-gradient(135deg, #D4956A, #B87333)' }}
           >
             <Zap size={24} className="text-white" />
           </motion.div>
@@ -85,7 +85,7 @@ export default function LoginPage() {
             animate={{ scaleX: 1 }}
             transition={{ delay: 0.4, duration: 0.5 }}
             className="h-px w-12 mt-6 origin-center"
-            style={{ background: 'linear-gradient(90deg, transparent, #c7d2fe, transparent)' }}
+            style={{ background: 'linear-gradient(90deg, transparent, #D4956A, transparent)' }}
           />
         </div>
 
