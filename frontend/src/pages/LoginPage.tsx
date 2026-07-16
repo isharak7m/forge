@@ -65,7 +65,7 @@ export default function LoginPage() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.4 }}
             className="text-3xl font-bold tracking-tight mb-2"
-            style={{ color: '#111827', letterSpacing: '-0.03em' }}
+            style={{ color: '#B87333', letterSpacing: '-0.03em' }}
           >
             Forge
           </motion.h1>
