@@ -38,6 +38,31 @@ export interface FoodLog {
   carbsG: number;
   fatG: number;
   fiberG: number;
+  vitaminA?: number;
+  vitaminC?: number;
+  vitaminD?: number;
+  vitaminE?: number;
+  vitaminK?: number;
+  vitaminB1?: number;
+  vitaminB2?: number;
+  vitaminB3?: number;
+  vitaminB5?: number;
+  vitaminB6?: number;
+  vitaminB7?: number;
+  vitaminB9?: number;
+  vitaminB12?: number;
+  calcium?: number;
+  iron?: number;
+  magnesium?: number;
+  potassium?: number;
+  sodium?: number;
+  zinc?: number;
+  copper?: number;
+  manganese?: number;
+  selenium?: number;
+  phosphorus?: number;
+  iodine?: number;
+  chromium?: number;
   loggedAt: string;
 }
 
@@ -49,6 +74,8 @@ export interface ExerciseLog {
   reps: number;
   weightKg: number;
   rpe: number;
+  duration?: number;
+  zone?: string;
   notes: string;
   volume: number;
 }
@@ -64,21 +91,6 @@ export interface WorkoutSession {
   createdAt: string;
 }
 
-export interface BodyMetric {
-  id: number;
-  recordedDate: string;
-  weightKg: number;
-  waistCm: number;
-  chestCm: number;
-  armsCm: number;
-  thighsCm: number;
-  bodyFatPercentage: number;
-  sleepHours: number;
-  waterLiters: number;
-  recoveryScore: number;
-  notes: string;
-}
-
 export interface DailyNutritionSummary {
   date: string;
   totalCalories: number;
@@ -88,6 +100,7 @@ export interface DailyNutritionSummary {
   totalFiber: number;
   consistencyScore: number;
   meals: FoodLog[];
+  micronutrients?: Record<string, number>;
 }
 
 export interface MacroDistribution {
@@ -142,12 +155,22 @@ export interface Recommendation {
   actionItem: string;
 }
 
-export interface AssistantResponse {
-  query: string;
-  response: string;
-  intent: string;
-  dataSources: string[];
-  timestamp: string;
+export interface WorkoutPrediction {
+  exerciseName: string;
+  current1RM: number;
+  predicted30Days1RM: number;
+  predicted60Days1RM: number;
+  predicted90Days1RM: number;
+  trend: string;
+  confidence: string;
+  methodology: string;
+  keyFactors: string[];
+}
+
+export interface RLRecommendation {
+  state: string;
+  recommendation: string;
+  qValues: number[];
 }
 
 export interface TrendPoint {

@@ -1,15 +1,44 @@
-import { ApiResponse, BodyMetric, TrendPoint } from '../types';
+import { ApiResponse } from '../types';
 import { api } from './axios';
 
+export interface SleepEntry {
+  id: number;
+  date: string;
+  durationHours: number;
+  qualityScore: number;
+  bedtime?: string;
+  wakeTime?: string;
+}
+
+export interface WaterEntry {
+  id: number;
+  date: string;
+  amountMl: number;
+}
+
 export const metricApi = {
-  recordMetric: async (data: any) => {
-    const res = await api.post<ApiResponse<BodyMetric>>('/metrics', data);
+  recordWeight: async (weightKg: number) => {
+    const res = await api.post<ApiResponse<any>>('/users/weight', { weightKg });
     return res.data;
   },
   getWeightTrend: async () => {
-    const to = new Date().toISOString().split('T')[0];
-    const from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    const res = await api.get<ApiResponse<TrendPoint[]>>('/metrics/trends/weight', { params: { from, to } });
+    const res = await api.get<ApiResponse<any[]>>('/metrics/trends/weight');
+    return res.data;
+  },
+  recordSleep: async (data: { date: string; durationHours: number; qualityScore?: number }) => {
+    const res = await api.post<ApiResponse<any>>('/sleep', data);
+    return res.data;
+  },
+  getSleepHistory: async (days = 7) => {
+    const res = await api.get<ApiResponse<SleepEntry[]>>(`/sleep/history?days=${days}`);
+    return res.data;
+  },
+  recordWater: async (data: { date: string; amountMl: number }) => {
+    const res = await api.post<ApiResponse<any>>('/water', data);
+    return res.data;
+  },
+  getWaterHistory: async (days = 7) => {
+    const res = await api.get<ApiResponse<WaterEntry[]>>(`/water/history?days=${days}`);
     return res.data;
   }
 };

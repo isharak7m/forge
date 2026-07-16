@@ -1,5 +1,6 @@
 package com.fitmind.dto.workout;
 
+import com.fitmind.entity.enums.CardioZone;
 import com.fitmind.entity.enums.ExerciseCategory;
 import lombok.Builder;
 import lombok.Data;
@@ -14,6 +15,8 @@ public class ExerciseLogResponse {
     private Integer reps;
     private Double weightKg;
     private Integer rpe;
+    private Integer duration;
+    private CardioZone zone;
     private String notes;
-    private Double volume; // weightKg * reps * sets
+    private Double volume;
 }

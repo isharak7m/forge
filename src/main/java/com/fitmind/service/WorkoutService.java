@@ -4,6 +4,7 @@ import com.fitmind.dto.workout.*;
 import com.fitmind.entity.ExerciseLog;
 import com.fitmind.entity.User;
 import com.fitmind.entity.WorkoutSession;
+import com.fitmind.entity.enums.ExerciseCategory;
 import com.fitmind.exception.ResourceNotFoundException;
 import com.fitmind.repository.ExerciseLogRepository;
 import com.fitmind.repository.UserRepository;
@@ -48,6 +49,16 @@ public class WorkoutService {
             throw new RuntimeException("Unauthorized");
         }
 
+        if (request.getCategory() == ExerciseCategory.STRENGTH) {
+            if (request.getSets() == null || request.getReps() == null) {
+                throw new IllegalArgumentException("Sets and reps are required for strength exercises");
+            }
+        } else if (request.getCategory() == ExerciseCategory.CARDIO) {
+            if (request.getDuration() == null || request.getZone() == null) {
+                throw new IllegalArgumentException("Duration and zone are required for cardio exercises");
+            }
+        }
+
         ExerciseLog exercise = ExerciseLog.builder()
                 .workoutSession(session)
                 .exerciseName(request.getExerciseName())
@@ -56,12 +67,13 @@ public class WorkoutService {
                 .reps(request.getReps())
                 .weightKg(request.getWeightKg())
                 .rpe(request.getRpe())
+                .duration(request.getDuration())
+                .zone(request.getZone())
                 .notes(request.getNotes())
                 .build();
 
         exerciseRepository.save(exercise);
         
-        // Refresh session
         session = sessionRepository.findById(sessionId).orElseThrow();
         return mapToResponse(session);
     }
@@ -92,9 +104,11 @@ public class WorkoutService {
         for (String exerciseName : exercises) {
             List<ExerciseLog> logs = exerciseRepository.findPersonalRecordsByExercise(userId, exerciseName);
             if (!logs.isEmpty()) {
-                ExerciseLog best = logs.get(0); // Query already orders by volume DESC
+                ExerciseLog best = logs.get(0);
                 double volume = calculateExerciseVolume(best);
-                double epley1rm = best.getWeightKg() * (1.0 + (best.getReps() / 30.0));
+                double w = best.getWeightKg() != null ? best.getWeightKg() : 0.0;
+                double r = best.getReps() != null ? best.getReps() : 0.0;
+                double epley1rm = r > 0 ? w * (1.0 + (r / 30.0)) : 0.0;
                 
                 prs.add(PersonalRecord.builder()
                         .exerciseName(best.getExerciseName())
@@ -136,7 +150,7 @@ public class WorkoutService {
                 .date(log.getWorkoutSession().getDate())
                 .volume(calculateExerciseVolume(log))
                 .maxWeight(log.getWeightKg())
-                .totalReps(log.getReps() * log.getSets())
+                .totalReps((log.getReps() != null ? log.getReps() : 0) * (log.getSets() != null ? log.getSets() : 0))
                 .build()
         ).collect(Collectors.toList());
     }
@@ -169,12 +183,15 @@ public class WorkoutService {
                 .reps(log.getReps())
                 .weightKg(log.getWeightKg())
                 .rpe(log.getRpe())
+                .duration(log.getDuration())
+                .zone(log.getZone())
                 .notes(log.getNotes())
                 .volume(calculateExerciseVolume(log))
                 .build();
     }
 
     private double calculateExerciseVolume(ExerciseLog log) {
+        if (log.getCategory() != ExerciseCategory.STRENGTH) return 0.0;
         if (log.getWeightKg() == null || log.getReps() == null || log.getSets() == null) return 0.0;
         return log.getWeightKg() * log.getReps() * log.getSets();
     }

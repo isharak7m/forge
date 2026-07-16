@@ -39,4 +39,13 @@ public interface FoodLogRepository extends JpaRepository<FoodLog, Long> {
 
     @Query("SELECT f.date, SUM(f.calories) FROM FoodLog f WHERE f.user.id = :userId AND f.date BETWEEN :from AND :to GROUP BY f.date ORDER BY f.date")
     List<Object[]> findDailyCaloriesByDateRange(@Param("userId") Long userId, @Param("from") LocalDate from, @Param("to") LocalDate to);
+
+    @Query("SELECT COUNT(f) FROM FoodLog f WHERE f.user.id = :userId")
+    Long countByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT f FROM FoodLog f WHERE f.user.id = :userId ORDER BY f.date ASC LIMIT 1")
+    java.util.Optional<FoodLog> findFirstByUserIdOrderByDateAsc(@Param("userId") Long userId);
+
+    @Query("SELECT MAX(f.date) FROM FoodLog f WHERE f.user.id = :userId")
+    java.util.Optional<LocalDate> findMaxDateByUserId(@Param("userId") Long userId);
 }

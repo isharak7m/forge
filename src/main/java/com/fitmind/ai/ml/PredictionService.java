@@ -1,13 +1,10 @@
 package com.fitmind.ai.ml;
 
 import com.fitmind.dto.ai.WeightPrediction;
-import com.fitmind.entity.BodyMetric;
 import com.fitmind.entity.User;
-import com.fitmind.entity.enums.Gender;
-import com.fitmind.repository.BodyMetricRepository;
-import com.fitmind.repository.FoodLogRepository;
+import com.fitmind.entity.weight.WeightLog;
 import com.fitmind.repository.UserRepository;
-import com.fitmind.repository.WorkoutSessionRepository;
+import com.fitmind.repository.WeightLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,64 +17,68 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PredictionService {
 
-    private final BodyMetricRepository metricRepository;
-    private final FoodLogRepository foodRepository;
-    private final WorkoutSessionRepository workoutRepository;
     private final UserRepository userRepository;
+    private final WeightLogRepository weightLogRepository;
 
     public WeightPrediction predictWeight(Long userId) {
         User user = userRepository.findById(userId).orElseThrow();
-        List<BodyMetric> metrics = metricRepository.findByUserIdOrderByRecordedDateDesc(userId);
-        
-        if (metrics.size() < 5) {
+        List<WeightLog> logs = weightLogRepository.findByUserIdOrderByDateAsc(userId);
+
+        if (logs.size() < 3) {
             return generateTdeeEstimate(user);
         }
 
-        // Reverse to chronological order
-        List<BodyMetric> chronoMetrics = new ArrayList<>();
-        for (int i = metrics.size() - 1; i >= 0; i--) {
-            if (metrics.get(i).getWeightKg() != null) {
-                chronoMetrics.add(metrics.get(i));
-            }
+        return trainAndPredict(user, logs);
+    }
+
+    private WeightPrediction trainAndPredict(User user, List<WeightLog> logs) {
+        int n = logs.size();
+        double[] x = new double[n];
+        double[] y = new double[n];
+
+        LocalDate startDate = logs.get(0).getDate();
+        for (int i = 0; i < n; i++) {
+            x[i] = ChronoUnit.DAYS.between(startDate, logs.get(i).getDate());
+            y[i] = logs.get(i).getWeightKg();
         }
 
-        if (chronoMetrics.size() < 5) {
-             return generateTdeeEstimate(user);
+        LinearRegressionModel model = new LinearRegressionModel(x, y);
+        double currentWeight = logs.get(n - 1).getWeightKg();
+
+        double pred30 = model.predict(ChronoUnit.DAYS.between(startDate, LocalDate.now().plusDays(30)));
+        double pred60 = model.predict(ChronoUnit.DAYS.between(startDate, LocalDate.now().plusDays(60)));
+        double pred90 = model.predict(ChronoUnit.DAYS.between(startDate, LocalDate.now().plusDays(90)));
+
+        double slope = model.getSlope();
+        String trend = Math.abs(slope) < 0.01 ? "STABLE" : (slope < 0 ? "LOSING" : "GAINING");
+
+        String confidence;
+        if (n >= 20 && model.getRSquared() > 0.7) {
+            confidence = "HIGH";
+        } else if (n >= 10) {
+            confidence = "MEDIUM";
+        } else {
+            confidence = "LOW";
         }
 
-        double[] x = new double[chronoMetrics.size()];
-        double[] y = new double[chronoMetrics.size()];
-        LocalDate firstDate = chronoMetrics.get(0).getRecordedDate();
-        LocalDate lastDate = chronoMetrics.get(chronoMetrics.size() - 1).getRecordedDate();
-        
-        for (int i = 0; i < chronoMetrics.size(); i++) {
-            x[i] = ChronoUnit.DAYS.between(firstDate, chronoMetrics.get(i).getRecordedDate());
-            y[i] = chronoMetrics.get(i).getWeightKg();
-        }
-
-        SimpleLinearRegression model = new SimpleLinearRegression(x, y);
-        
-        long daysSinceFirst = ChronoUnit.DAYS.between(firstDate, LocalDate.now());
-        double currentPred = model.predict(daysSinceFirst);
-        double p30 = model.predict(daysSinceFirst + 30);
-        double p60 = model.predict(daysSinceFirst + 60);
-        double p90 = model.predict(daysSinceFirst + 90);
-
-        String trend = model.getSlope() > 0.05 ? "GAINING" : (model.getSlope() < -0.05 ? "LOSING" : "STABLE");
-        String confidence = model.getRSquared() > 0.7 ? "HIGH" : (model.getRSquared() > 0.4 ? "MEDIUM" : "LOW");
-        
         List<String> factors = new ArrayList<>();
-        factors.add("Linear regression based on " + chronoMetrics.size() + " weight entries.");
-        factors.add(String.format("Current rate: %.2f kg/month", model.getSlope() * 30));
+        factors.add("Based on " + n + " weight log entries.");
+        factors.add("Model fit (R²): " + String.format("%.2f", model.getRSquared()));
+        factors.add(String.format("Linear trend: %.3f kg/day", slope));
+        if (trend.equals("LOSING")) {
+            factors.add("You are trending downward. Maintain your current habits.");
+        } else if (trend.equals("GAINING")) {
+            factors.add("Weight is trending upward. Review nutrition if this is unintended.");
+        }
 
         return WeightPrediction.builder()
-                .currentWeight(user.getCurrentWeightKg() != null ? user.getCurrentWeightKg() : currentPred)
-                .predicted30Days(Math.round(p30 * 10.0) / 10.0)
-                .predicted60Days(Math.round(p60 * 10.0) / 10.0)
-                .predicted90Days(Math.round(p90 * 10.0) / 10.0)
+                .currentWeight(currentWeight)
+                .predicted30Days(Math.round(pred30 * 10.0) / 10.0)
+                .predicted60Days(Math.round(pred60 * 10.0) / 10.0)
+                .predicted90Days(Math.round(pred90 * 10.0) / 10.0)
                 .trend(trend)
                 .confidence(confidence)
-                .methodology("Ordinary Least Squares (OLS) Linear Regression")
+                .methodology("Linear Regression (OLS via jnumj matmul/solve)")
                 .keyFactors(factors)
                 .build();
     }
@@ -85,9 +86,9 @@ public class PredictionService {
     private WeightPrediction generateTdeeEstimate(User user) {
         double weight = user.getCurrentWeightKg() != null ? user.getCurrentWeightKg() : 70.0;
         List<String> factors = new ArrayList<>();
-        factors.add("Insufficient historical weight data (needs 5+ entries).");
-        factors.add("Using theoretical TDEE estimation.");
-        
+        factors.add("Insufficient weight history for trend analysis.");
+        factors.add("Log weight entries daily for personalized predictions.");
+
         return WeightPrediction.builder()
                 .currentWeight(weight)
                 .predicted30Days(weight)
@@ -95,7 +96,7 @@ public class PredictionService {
                 .predicted90Days(weight)
                 .trend("STABLE")
                 .confidence("LOW")
-                .methodology("TDEE Base Estimate (Insufficient Data)")
+                .methodology("Current Weight Estimate (Insufficient Historical Data)")
                 .keyFactors(factors)
                 .build();
     }

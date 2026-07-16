@@ -1,8 +1,8 @@
 package com.fitmind.ai.ml;
 
 import com.fitmind.dto.ai.AdherenceScore;
-import com.fitmind.repository.BodyMetricRepository;
 import com.fitmind.repository.FoodLogRepository;
+import com.fitmind.repository.SleepLogRepository;
 import com.fitmind.repository.WorkoutSessionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ public class AdherenceService {
 
     private final WorkoutSessionRepository workoutRepository;
     private final FoodLogRepository foodRepository;
-    private final BodyMetricRepository metricRepository;
+    private final SleepLogRepository sleepLogRepository;
 
     public AdherenceScore calculateAdherence(Long userId) {
         LocalDate today = LocalDate.now();
@@ -32,8 +32,8 @@ public class AdherenceService {
         double nutritionScore = (foodLogs / 30.0) * 30.0;
 
         // Sleep (20 pts)
-        Double avgSleep = metricRepository.avgSleepHoursByUserIdAndDateBetween(userId, thirtyDaysAgo, today);
-        double sleepScore = 10.0; // Default neutral
+        Double avgSleep = sleepLogRepository.avgSleepHoursByUserIdAndDateBetween(userId, thirtyDaysAgo, today);
+        double sleepScore = 10.0;
         if (avgSleep != null) {
             if (avgSleep >= 7.5) sleepScore = 20.0;
             else if (avgSleep >= 6.5) sleepScore = 15.0;
@@ -47,9 +47,9 @@ public class AdherenceService {
         else if (workoutCount < 8) penalty = 5.0;
 
         double total = Math.max(0, Math.min(100, workoutScore + nutritionScore + sleepScore - penalty));
-        
+
         String riskLevel = total < 40 ? "HIGH" : (total < 70 ? "MEDIUM" : "LOW");
-        
+
         List<String> improvements = new ArrayList<>();
         if (workoutScore < 20) improvements.add("Increase weekly workout frequency");
         if (nutritionScore < 15) improvements.add("Log meals more consistently");

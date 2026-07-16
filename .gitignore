@@ -2,9 +2,15 @@ target/
 *.jar
 *.log
 *.err
+*.out
 .idea/
 *.iml
 .vscode/
 node_modules/
 dist/
 .DS_Store
+*.ps1
+*.bat
+*.csv
+login2.json
+token.txt
