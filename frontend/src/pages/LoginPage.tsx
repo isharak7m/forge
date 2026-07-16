@@ -4,7 +4,7 @@ import { authApi } from '../api/auth';
 import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
-import { Zap, Mail, Lock, ArrowRight, Activity, TrendingUp, Brain, Shield } from 'lucide-react';
+import { Zap, Mail, Lock, ArrowRight } from 'lucide-react';
 export default function LoginPage() {
   useEffect(() => { document.title = 'Sign In - Forge'; }, []);
   const [email, setEmail] = useState('');
@@ -32,13 +32,6 @@ export default function LoginPage() {
     }
   };
 
-  const features = [
-    { icon: Activity, label: 'Smart Analytics', desc: 'Real-time macro & volume tracking' },
-    { icon: TrendingUp, label: 'AI Predictions', desc: 'Forecast progress using ML models' },
-    { icon: Brain, label: 'Neural Insights', desc: 'Personalized fitness intelligence' },
-    { icon: Shield, label: 'Plateau Detection', desc: 'Break stagnation with AI guidance' },
-  ];
-
   return (
     <div className="min-h-screen flex" style={{ background: 'var(--bg)' }}>
       {/* Left panel */}
@@ -55,35 +48,6 @@ export default function LoginPage() {
               <Zap size={16} className="text-white" />
             </div>
             <span className="text-lg font-semibold text-white" style={{ letterSpacing: '-0.02em' }}>Forge</span>
-          </div>
-
-          <h2 className="text-2xl font-bold leading-tight mb-3" style={{ color: 'var(--text)', letterSpacing: '-0.02em' }}>
-            Your AI-Powered<br />
-            <span className="gradient-text">Fitness Intelligence</span>
-          </h2>
-          <p className="text-sm mb-10" style={{ color: 'var(--text-muted)' }}>
-            Stop guessing. Start optimizing. Transform raw fitness data into actionable intelligence.
-          </p>
-
-          <div className="flex flex-col gap-2.5">
-            {features.map(({ icon: Icon, label, desc }, i) => (
-              <motion.div
-                key={label}
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 + i * 0.05 }}
-                className="flex items-center gap-3 p-3 rounded-lg"
-                style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)' }}
-              >
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'hsla(var(--hue-primary), 55%, 50%, 0.08)' }}>
-                  <Icon size={15} style={{ color: 'var(--primary-light)' }} />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-white">{label}</p>
-                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{desc}</p>
-                </div>
-              </motion.div>
-            ))}
           </div>
         </div>
 
