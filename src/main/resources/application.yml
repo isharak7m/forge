@@ -59,7 +59,7 @@ logging:
 
 # CORS — add your production domain here
 cors:
-  allowed-origins: "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000,https://fitmind.vercel.app"
+  allowed-origins: "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000,https://forge-eosin-gamma.vercel.app"
   allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
   allowed-headers: "*"
   max-age: 3600
