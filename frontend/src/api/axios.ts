@@ -2,7 +2,8 @@ import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL as string || '/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL as string || 'https://forge-w40c.onrender.com/api',
+  timeout: 60000,
 });
 
 api.interceptors.request.use((config) => {
