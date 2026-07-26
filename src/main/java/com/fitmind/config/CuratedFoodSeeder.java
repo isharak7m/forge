@@ -173,6 +173,7 @@ public class CuratedFoodSeeder {
         items.add( FoodItem.builder().name("Coconut Water").category("Beverages").caloriesPer100g(19.0).proteinPer100g(0.7).carbsPer100g(3.7).fatPer100g(0.2).fiberPer100g(1.1).build());
         items.add( FoodItem.builder().name("Green Tea").category("Beverages").caloriesPer100g(1.0).proteinPer100g(0.0).carbsPer100g(0.0).fatPer100g(0.0).fiberPer100g(0.0).build());
         items.add( FoodItem.builder().name("Black Coffee").category("Beverages").caloriesPer100g(1.0).proteinPer100g(0.1).carbsPer100g(0.0).fatPer100g(0.0).fiberPer100g(0.0).build());
+        items.add( FoodItem.builder().name("Milk Coffee (Latte)").category("Beverages").caloriesPer100g(25.0).proteinPer100g(1.2).carbsPer100g(2.5).fatPer100g(1.1).fiberPer100g(0.0).build());
         items.add( FoodItem.builder().name("Chocolate Milk").category("Beverages").caloriesPer100g(83.0).proteinPer100g(3.3).carbsPer100g(10.0).fatPer100g(3.4).fiberPer100g(0.5).build());
         items.add( FoodItem.builder().name("Protein Shake (Whey)").category("Beverages").caloriesPer100g(55.0).proteinPer100g(10.0).carbsPer100g(2.0).fatPer100g(0.7).fiberPer100g(0.0).build());
         items.add( FoodItem.builder().name("Soda (Cola)").category("Beverages").caloriesPer100g(41.0).proteinPer100g(0.0).carbsPer100g(10.6).fatPer100g(0.0).fiberPer100g(0.0).build());

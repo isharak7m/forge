@@ -26,11 +26,11 @@ export default function NutritionPage() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
   const [searchPage, setSearchPage] = useState(0);
-  const [servingG, setServingG] = useState(100);
   const [basePer100g, setBasePer100g] = useState<Record<string, number>>({});
   const [formData, setFormData] = useState<Record<string, string>>({
     foodName: '',
     mealCategory: 'BREAKFAST',
+    servingSize: '100',
     unit: 'GRAM',
     calories: '',
     proteinG: '',
@@ -69,8 +69,8 @@ export default function NutritionPage() {
       base[f] = product[`${f}Per100g`] || 0;
     }
     setBasePer100g(base);
-    setServingG(100);
-    applyServingScale(base, 100);
+    const serving = parseInt(formData.servingSize) || 100;
+    applyServingScale(base, serving);
     setFormData(prev => ({ ...prev, foodName: product.name }));
     setSearchQuery('');
     setSearchResults([]);
@@ -90,10 +90,10 @@ export default function NutritionPage() {
     for (const f of numericFields) {
       payload[f] = parseFloat(formData[f]) || 0;
     }
-    const optimistic: FoodLog = { id: -Date.now(), date, mealCategory: payload.mealCategory, foodName: payload.foodName, servingSize: 1, unit: payload.unit, calories: payload.calories, proteinG: payload.proteinG, carbsG: payload.carbsG, fatG: payload.fatG, fiberG: payload.fiberG, loggedAt: new Date().toISOString() };
+    const optimistic: FoodLog = { id: -Date.now(), date, mealCategory: payload.mealCategory, foodName: payload.foodName, servingSize: parseFloat(formData.servingSize) || 0, unit: payload.unit, calories: payload.calories, proteinG: payload.proteinG, carbsG: payload.carbsG, fatG: payload.fatG, fiberG: payload.fiberG, loggedAt: new Date().toISOString() };
     setSummary(prev => prev ? { ...prev, meals: [...prev.meals, optimistic], totalCalories: prev.totalCalories + optimistic.calories, totalProtein: prev.totalProtein + optimistic.proteinG, totalCarbs: prev.totalCarbs + optimistic.carbsG, totalFat: prev.totalFat + optimistic.fatG } : prev);
     setShowForm(false);
-    const emptyForm: Record<string, string> = { foodName: '', mealCategory: 'BREAKFAST', unit: 'GRAM', calories: '', proteinG: '', carbsG: '', fatG: '', fiberG: '', ...MICRO_INIT };
+    const emptyForm: Record<string, string> = { foodName: '', mealCategory: 'BREAKFAST', servingSize: '100', unit: 'GRAM', calories: '', proteinG: '', carbsG: '', fatG: '', fiberG: '', ...MICRO_INIT };
     setFormData(emptyForm);
     try { const res = await nutritionApi.logFood(payload); if (res.success) toast.success('Food logged!'); loadData(); } catch { toast.error('Failed to log food'); loadData(); }
   };
@@ -201,8 +201,8 @@ export default function NutritionPage() {
                 )}
               </div>
               <div>
-                <label className="label">Serving (g)</label>
-                <input type="number" className="input" min={1} value={servingG} onChange={e => { const v = parseInt(e.target.value) || 100; setServingG(v); if (Object.keys(basePer100g).length) applyServingScale(basePer100g, v); }} />
+                <label className="label">Serving Size</label>
+                <input type="number" className="input" min={1} value={formData.servingSize} onChange={e => { const v = e.target.value; setFormData(prev => ({...prev, servingSize: v})); const n = parseInt(v) || 100; if (Object.keys(basePer100g).length) applyServingScale(basePer100g, n); }} />
               </div>
               <div>
                 <label className="label">Food Name</label>
