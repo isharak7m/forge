@@ -6,10 +6,15 @@ on:
   pull_request:
     branches: [master]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   backend:
     name: Backend
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: .
@@ -26,14 +31,11 @@ jobs:
 
       - name: Build & test
         run: mvn verify -B
-        continue-on-error: true
-
-      - name: Build with Maven
-        run: mvn package -DskipTests -B
 
   frontend:
     name: Frontend
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: frontend
