@@ -8,18 +8,14 @@ interface SkeletonProps {
   variant?: 'text' | 'card' | 'circle';
 }
 
-export function Skeleton({
-  width,
-  height,
-  borderRadius,
-  style,
-  variant = 'text',
-}: SkeletonProps) {
+export function Skeleton({ width, height, borderRadius, style, variant = 'text' }: SkeletonProps) {
   const baseStyle: CSSProperties = {
-    background: 'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)',
+    background:
+      'linear-gradient(90deg, var(--bg-elevated) 25%, var(--border) 50%, var(--bg-elevated) 75%)',
     backgroundSize: '200% 100%',
     animation: 'shimmer 1.5s ease-in-out infinite',
-    borderRadius: borderRadius ?? (variant === 'circle' ? '50%' : variant === 'card' ? '12px' : '6px'),
+    borderRadius:
+      borderRadius ?? (variant === 'circle' ? '50%' : variant === 'card' ? '12px' : '6px'),
     width: width ?? (variant === 'circle' ? '40px' : '100%'),
     height: height ?? (variant === 'text' ? '14px' : variant === 'circle' ? '40px' : '100px'),
     ...style,

@@ -57,10 +57,20 @@ function FloatingRingsInner() {
   });
   return (
     <group>
-      <Torus ref={ring1} args={[1.2, 0.03, 16, 48]} position={[0, 0, 0]} rotation={[Math.PI / 3, 0, 0]}>
+      <Torus
+        ref={ring1}
+        args={[1.2, 0.03, 16, 48]}
+        position={[0, 0, 0]}
+        rotation={[Math.PI / 3, 0, 0]}
+      >
         <meshBasicMaterial color="#22d3ee" opacity={0.3} transparent />
       </Torus>
-      <Torus ref={ring2} args={[1.0, 0.025, 16, 48]} position={[0, 0, 0]} rotation={[-Math.PI / 4, Math.PI / 6, 0]}>
+      <Torus
+        ref={ring2}
+        args={[1.0, 0.025, 16, 48]}
+        position={[0, 0, 0]}
+        rotation={[-Math.PI / 4, Math.PI / 6, 0]}
+      >
         <meshBasicMaterial color="#a78bfa" opacity={0.25} transparent />
       </Torus>
     </group>

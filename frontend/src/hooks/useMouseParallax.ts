@@ -7,33 +7,37 @@ interface ParallaxOptions {
 
 export function useMouseParallax<T extends HTMLElement>(
   ref: RefObject<T | null>,
-  options: ParallaxOptions = {}
+  options: ParallaxOptions = {},
 ) {
   const { intensity = 8, reverse = false } = options;
   const frameRef = useRef<number>(0);
 
-  const handleMouse = useCallback((e: MouseEvent) => {
-    if (!ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const factor = reverse ? -1 : 1;
-    const rotateX = ((e.clientY - centerY) / (rect.height / 2)) * intensity * factor;
-    const rotateY = ((e.clientX - centerX) / (rect.width / 2)) * intensity * factor;
+  const handleMouse = useCallback(
+    (e: MouseEvent) => {
+      if (!ref.current) return;
+      const rect = ref.current.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const factor = reverse ? -1 : 1;
+      const rotateX = ((e.clientY - centerY) / (rect.height / 2)) * intensity * factor;
+      const rotateY = ((e.clientX - centerX) / (rect.width / 2)) * intensity * factor;
 
-    cancelAnimationFrame(frameRef.current);
-    frameRef.current = requestAnimationFrame(() => {
-      if (ref.current) {
-        ref.current.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
-      }
-    });
-  }, [ref, intensity, reverse]);
+      cancelAnimationFrame(frameRef.current);
+      frameRef.current = requestAnimationFrame(() => {
+        if (ref.current) {
+          ref.current.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
+        }
+      });
+    },
+    [ref, intensity, reverse],
+  );
 
   const handleLeave = useCallback(() => {
     cancelAnimationFrame(frameRef.current);
     frameRef.current = requestAnimationFrame(() => {
       if (ref.current) {
-        ref.current.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg) translateZ(0)';
+        ref.current.style.transform =
+          'perspective(600px) rotateX(0deg) rotateY(0deg) translateZ(0)';
       }
     });
   }, [ref]);

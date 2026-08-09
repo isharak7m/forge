@@ -1,6 +1,15 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Activity, PieChart, TrendingUp, Settings, LogOut, LayoutDashboard, Zap, User } from 'lucide-react';
+import {
+  Activity,
+  PieChart,
+  TrendingUp,
+  Settings,
+  LogOut,
+  LayoutDashboard,
+  Zap,
+  User,
+} from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -41,10 +50,18 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       >
         <div className="p-5 pb-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--primary)' }}>
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center"
+              style={{ background: 'var(--primary)' }}
+            >
               <Zap size={16} className="text-white" />
             </div>
-            <span className="text-base font-semibold text-white" style={{ letterSpacing: '-0.02em' }}>Forge</span>
+            <span
+              className="text-base font-semibold text-white"
+              style={{ letterSpacing: '-0.02em' }}
+            >
+              Forge
+            </span>
           </div>
         </div>
 
@@ -57,19 +74,26 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 <div
                   className="flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all"
                   style={{
-                    background: isActive ? 'hsla(var(--hue-primary), 60%, 50%, 0.08)' : 'transparent',
+                    background: isActive
+                      ? 'hsla(var(--hue-primary), 60%, 50%, 0.08)'
+                      : 'transparent',
                     color: isActive ? 'var(--primary-light)' : 'var(--text-muted)',
                   }}
                 >
                   <Icon size={16} />
-                  <span style={{ fontSize: '0.8125rem', fontWeight: isActive ? 500 : 400 }}>{link.label}</span>
+                  <span style={{ fontSize: '0.8125rem', fontWeight: isActive ? 500 : 400 }}>
+                    {link.label}
+                  </span>
                 </div>
               </Link>
             );
           })}
         </div>
 
-        <div className="p-3 m-2.5 rounded-xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)' }}>
+        <div
+          className="p-3 m-2.5 rounded-xl"
+          style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)' }}
+        >
           <div className="flex items-center gap-2.5 mb-2.5">
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-semibold text-white flex-shrink-0"
@@ -78,14 +102,22 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               {user?.name?.charAt(0).toUpperCase() || 'U'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-white truncate" style={{ fontWeight: 500 }}>{user?.name}</p>
-              <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{user?.email}</p>
+              <p className="text-sm text-white truncate" style={{ fontWeight: 500 }}>
+                {user?.name}
+              </p>
+              <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
+                {user?.email}
+              </p>
             </div>
           </div>
           <button
             onClick={logout}
             className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs rounded-lg transition-all"
-            style={{ color: '#f87171', background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.08)' }}
+            style={{
+              color: '#f87171',
+              background: 'rgba(239,68,68,0.06)',
+              border: '1px solid rgba(239,68,68,0.08)',
+            }}
           >
             <LogOut size={12} />
             Sign Out
@@ -103,16 +135,28 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             borderBottom: '1px solid var(--border)',
           }}
         >
-          <h2 style={{ fontSize: '0.9375rem', fontWeight: 600, color: 'var(--text)', letterSpacing: '-0.01em' }}>
+          <h2
+            style={{
+              fontSize: '0.9375rem',
+              fontWeight: 600,
+              color: 'var(--text)',
+              letterSpacing: '-0.01em',
+            }}
+          >
             {pageTitle}
           </h2>
           <div className="ml-auto flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--accent)' }} />
-            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Live</span>
+            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              Live
+            </span>
           </div>
         </header>
 
-        <main className="flex-1 px-4 md:px-6 py-4 md:py-5 max-w-7xl w-full mx-auto" style={{ paddingBottom: 'calc(5.5rem + var(--safe-area-bottom, 0px))' }}>
+        <main
+          className="flex-1 px-4 md:px-6 py-4 md:py-5 max-w-7xl w-full mx-auto"
+          style={{ paddingBottom: 'calc(5.5rem + var(--safe-area-bottom, 0px))' }}
+        >
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
@@ -146,11 +190,16 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           const Icon = link.icon;
           const isActive = location.pathname === link.to;
           return (
-            <Link key={link.to} to={link.to} className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg flex-1"
+            <Link
+              key={link.to}
+              to={link.to}
+              className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg flex-1"
               style={{ color: isActive ? 'var(--primary-light)' : 'var(--text-muted)' }}
             >
               <Icon size={20} />
-              <span className="text-[10px]" style={{ fontWeight: 500 }}>{link.label}</span>
+              <span className="text-[10px]" style={{ fontWeight: 500 }}>
+                {link.label}
+              </span>
             </Link>
           );
         })}

@@ -27,31 +27,88 @@ function App() {
 
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <Toaster position="top-right" toastOptions={{
-        style: {
-          background: 'var(--bg-card-solid)',
-          color: 'var(--text)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius)',
-          fontSize: '0.8125rem',
-        }
-      }}/>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: 'var(--bg-card-solid)',
+            color: 'var(--text)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius)',
+            fontSize: '0.8125rem',
+          },
+        }}
+      />
       <Routes>
-        <Route path="/" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} />
-        
-        <Route path="/login" element={!isAuthenticated ? <LoginPage /> : <Navigate to="/dashboard" replace />} />
-        <Route path="/register" element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/dashboard" replace />} />
-        
-        <Route path="/dashboard" element={<ProtectedRoute><ErrorBoundary><DashboardPage /></ErrorBoundary></ProtectedRoute>} />
-        <Route path="/nutrition" element={<ProtectedRoute><ErrorBoundary><NutritionPage /></ErrorBoundary></ProtectedRoute>} />
-        <Route path="/workouts" element={<ProtectedRoute><ErrorBoundary><WorkoutsPage /></ErrorBoundary></ProtectedRoute>} />
-        <Route path="/metrics" element={<ProtectedRoute><ErrorBoundary><MetricsPage /></ErrorBoundary></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><ErrorBoundary><ProfilePage /></ErrorBoundary></ProtectedRoute>} />
-        
+        <Route
+          path="/"
+          element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />}
+        />
+
+        <Route
+          path="/login"
+          element={!isAuthenticated ? <LoginPage /> : <Navigate to="/dashboard" replace />}
+        />
+        <Route
+          path="/register"
+          element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/dashboard" replace />}
+        />
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <ErrorBoundary>
+                <DashboardPage />
+              </ErrorBoundary>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/nutrition"
+          element={
+            <ProtectedRoute>
+              <ErrorBoundary>
+                <NutritionPage />
+              </ErrorBoundary>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/workouts"
+          element={
+            <ProtectedRoute>
+              <ErrorBoundary>
+                <WorkoutsPage />
+              </ErrorBoundary>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/metrics"
+          element={
+            <ProtectedRoute>
+              <ErrorBoundary>
+                <MetricsPage />
+              </ErrorBoundary>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ErrorBoundary>
+                <ProfilePage />
+              </ErrorBoundary>
+            </ProtectedRoute>
+          }
+        />
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
-  )
+  );
 }
 
 export default App;
