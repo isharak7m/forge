@@ -9,5 +9,5 @@ export const userApi = {
   getProfile: async () => {
     const res = await api.get<ApiResponse<User>>('/users/me');
     return res.data;
-  }
+  },
 };

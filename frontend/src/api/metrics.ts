@@ -40,5 +40,5 @@ export const metricApi = {
   getWaterHistory: async (days = 7) => {
     const res = await api.get<ApiResponse<WaterEntry[]>>(`/water/history?days=${days}`);
     return res.data;
-  }
+  },
 };

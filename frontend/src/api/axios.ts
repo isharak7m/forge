@@ -2,7 +2,9 @@ import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL as string || (import.meta.env.PROD ? 'https://forge-w40c.onrender.com/api' : '/api'),
+  baseURL:
+    (import.meta.env.VITE_API_BASE_URL as string) ||
+    (import.meta.env.PROD ? 'https://forge-w40c.onrender.com/api' : '/api'),
   timeout: 60000,
 });
 
@@ -27,5 +29,5 @@ api.interceptors.response.use(
       window.location.href = '/login';
     }
     return Promise.reject(error);
-  }
+  },
 );

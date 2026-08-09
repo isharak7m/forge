@@ -11,7 +11,9 @@ export const workoutApi = {
     return res.data;
   },
   getSessions: async (from: string, to: string) => {
-    const res = await api.get<ApiResponse<WorkoutSession[]>>(`/workouts/sessions?from=${from}&to=${to}`);
+    const res = await api.get<ApiResponse<WorkoutSession[]>>(
+      `/workouts/sessions?from=${from}&to=${to}`,
+    );
     return res.data;
   },
   getPRs: async () => {
@@ -19,11 +21,15 @@ export const workoutApi = {
     return res.data;
   },
   getProgression: async (exerciseName: string) => {
-    const res = await api.get<ApiResponse<ProgressionPoint[]>>(`/workouts/exercises/${encodeURIComponent(exerciseName)}/progression`);
+    const res = await api.get<ApiResponse<ProgressionPoint[]>>(
+      `/workouts/exercises/${encodeURIComponent(exerciseName)}/progression`,
+    );
     return res.data;
   },
   predict1RM: async (exerciseName: string) => {
-    const res = await api.get<ApiResponse<any>>(`/workouts/predict-1rm?exerciseName=${encodeURIComponent(exerciseName)}`);
+    const res = await api.get<ApiResponse<any>>(
+      `/workouts/predict-1rm?exerciseName=${encodeURIComponent(exerciseName)}`,
+    );
     return res.data;
-  }
+  },
 };

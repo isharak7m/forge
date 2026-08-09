@@ -11,15 +11,21 @@ export const nutritionApi = {
     return res.data;
   },
   getDailyAnalytics: async (date: string) => {
-    const res = await api.get<ApiResponse<DailyNutritionSummary>>(`/nutrition/analytics/daily?date=${date}`);
+    const res = await api.get<ApiResponse<DailyNutritionSummary>>(
+      `/nutrition/analytics/daily?date=${date}`,
+    );
     return res.data;
   },
   getMacros: async (from: string, to: string) => {
-    const res = await api.get<ApiResponse<MacroDistribution>>(`/nutrition/analytics/macros?from=${from}&to=${to}`);
+    const res = await api.get<ApiResponse<MacroDistribution>>(
+      `/nutrition/analytics/macros?from=${from}&to=${to}`,
+    );
     return res.data;
   },
   searchFoods: async (query: string) => {
-    const res = await api.get<ApiResponse<any[]>>(`/nutrition/search?query=${encodeURIComponent(query)}`);
+    const res = await api.get<ApiResponse<any[]>>(
+      `/nutrition/search?query=${encodeURIComponent(query)}`,
+    );
     return res.data;
-  }
+  },
 };

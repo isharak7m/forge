@@ -1,4 +1,12 @@
-import { ApiResponse, WeightPrediction, PlateauAlert, AdherenceScore, Recommendation, WorkoutPrediction, RLRecommendation } from '../types';
+import {
+  ApiResponse,
+  WeightPrediction,
+  PlateauAlert,
+  AdherenceScore,
+  Recommendation,
+  WorkoutPrediction,
+  RLRecommendation,
+} from '../types';
 import { api } from './axios';
 
 export const aiApi = {
@@ -19,7 +27,9 @@ export const aiApi = {
     return res.data;
   },
   getWorkoutPrediction: async (exercise: string) => {
-    const res = await api.get<ApiResponse<WorkoutPrediction>>('/ai/predict/workout', { params: { exercise } });
+    const res = await api.get<ApiResponse<WorkoutPrediction>>('/ai/predict/workout', {
+      params: { exercise },
+    });
     return res.data;
   },
   getExercises: async () => {
@@ -31,7 +41,10 @@ export const aiApi = {
     return res.data;
   },
   executeTool: async (tool: string, params: Record<string, string> = {}) => {
-    const res = await api.post<ApiResponse<Record<string, string>>>('/ai/tools/execute', { tool, ...params });
+    const res = await api.post<ApiResponse<Record<string, string>>>('/ai/tools/execute', {
+      tool,
+      ...params,
+    });
     return res.data;
   },
   queryTools: async (q: string) => {
@@ -43,7 +56,12 @@ export const aiApi = {
     return res.data;
   },
   submitRLFeedback: async (state: string, action: string, reward: number, nextState?: string) => {
-    const res = await api.post<ApiResponse<string>>('/ai/rl/feedback', { state, action, reward, nextState });
+    const res = await api.post<ApiResponse<string>>('/ai/rl/feedback', {
+      state,
+      action,
+      reward,
+      nextState,
+    });
     return res.data;
-  }
+  },
 };
