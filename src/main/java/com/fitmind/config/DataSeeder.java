@@ -68,6 +68,8 @@ public class DataSeeder implements CommandLineRunner {
                     sleepLogRepository.findByUserId(existing.getId()));
             waterLogRepository.deleteAll(
                     waterLogRepository.findByUserId(existing.getId()));
+            weightLogRepository.deleteAll(
+                    weightLogRepository.findByUserIdOrderByDateAsc(existing.getId()));
             userRepository.delete(existing);
             entityManager.flush();
             entityManager.clear();
