@@ -7,7 +7,7 @@ services:
       - key: SPRING_DATASOURCE_URL
         value: jdbc:postgresql://db.rnorqsktpuvenjqmucbq.supabase.co:5432/postgres?sslmode=require
       - key: SPRING_DATASOURCE_USERNAME
-        value: postgres
+        value: postgres.rnorqsktpuvenjqmucbq
       - key: SPRING_DATASOURCE_PASSWORD
         sync: false
       - key: JWT_SECRET
