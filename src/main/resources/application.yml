@@ -3,9 +3,9 @@ spring:
     name: FitMind
 
   datasource:
-    url: jdbc:postgresql://dpg-d9c6mspkh4rs73c6b300-a:5432/forge_aofe?sslmode=require
-    username: forge_user
-    password: ${SPRING_DATASOURCE_PASSWORD:TrE6z7DrNL0HhmnqtLU49HijLCVLqpw4}
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   flyway:
