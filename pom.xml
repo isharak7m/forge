@@ -11,10 +11,10 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.fitmind</groupId>
-    <artifactId>fitmind-backend</artifactId>
+    <groupId>com.forge</groupId>
+    <artifactId>forge-backend</artifactId>
     <version>1.0.0</version>
-    <name>FitMind Backend</name>
+    <name>Forge Backend</name>
     <description>AI-Powered Personal Fitness Analytics Platform</description>
 
     <properties>
