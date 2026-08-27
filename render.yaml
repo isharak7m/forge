@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: fitmind-backend
+    name: forge-backend
     env: docker
     dockerfilePath: ./Dockerfile
     envVars:

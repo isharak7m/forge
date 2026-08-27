@@ -1,6 +1,6 @@
 spring:
   application:
-    name: FitMind
+    name: Forge
 
   datasource:
     url: ${SPRING_DATASOURCE_URL}
@@ -46,14 +46,14 @@ springdoc:
     path: /swagger-ui.html
     operationsSorter: method
   info:
-    title: FitMind API
-    description: AI-Powered Personal Fitness Analytics Platform API
+    title: Forge API
+    description: Forge Personal Fitness Analytics API
     version: 1.0.0
 
 # Logging
 logging:
   level:
-    com.fitmind: DEBUG
+    com.forge: DEBUG
     org.springframework.security: WARN
     org.hibernate.SQL: WARN
 
